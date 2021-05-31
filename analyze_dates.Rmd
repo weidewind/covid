@@ -1,0 +1,158 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+folder = "far20" # "far20"
+dates = read.csv2(file = paste(c("C:/Users/Дмитрий/Documents/CMD/covid/gennady_tree/trans_lineages2/",folder ,"/transmission_lineages.dates_stats"),collapse=""),header = T, sep = "\t")
+date_diffs = apply(dates, 1, function(e){
+  as.Date(e["median_rus_date"], format = "%Y-%m-%d")-as.Date(e["median_foreign_date"], format = "%Y-%m-%d")
+})
+
+rus_days_since_2019 = as.numeric(as.Date(dates[,"mean_rus_date"], format = "%Y-%m-%d")-as.Date("2020-01-01", format = "%Y-%m-%d"))
+foreign_days_since_2019 = as.numeric(as.Date(dates[,"mean_foreign_date"], format = "%Y-%m-%d")-as.Date("2020-01-01", format = "%Y-%m-%d"))
+
+wilcox.test(rus_days_since_2019, foreign_days_since_2019, paired = TRUE, alternative = "greater")
+
+cor.test(rus_days_since_2019-foreign_days_since_2019, as.numeric(dates[,"tree_distance_to_closest_foreign_node"]))
+plot(rus_days_since_2019-foreign_days_since_2019, as.numeric(dates[,"tree_distance_to_closest_foreign_node"]))
+
+#dates[as.Date(dates$max_rus_date, format = "%Y-%m-%d") >as.Date("2021-01-01", format = "%Y-%m-%d"), "entry"]
+
+```
+```{r}
+library(ggplot2)
+library(ggalt)
+library(tidyverse)
+
+
+folder = "far20" # "far20"
+path = paste(c("C:/Users/Дмитрий/Documents/CMD/covid/gennady_tree/trans_lineages2/",folder ,"/"),collapse="")
+dates = read.csv2(file = paste(c(path, "cluster_strains.dates_stats"),collapse=""),header = T, sep = "\t")
+
+dates[as.Date(dates$max_date, format = "%Y-%m-%d") >as.Date("2021-01-01", format = "%Y-%m-%d"), "entry"]
+num_of_dates = as.numeric(sapply(dates$all_dates, function(s){
+  length(unlist(strsplit(s, ",")))
+}))
+big_cluster_dates = dates[num_of_dates >= 0,]
+big_cluster_dates$entry <- forcats::fct_reorder(big_cluster_dates$entry, as.Date(big_cluster_dates$min_date, format = "%Y-%m-%d"), .desc = TRUE)
+#big_cluster_dates = big_cluster_dates[order(big_cluster_dates$max_date),]
+#big_cluster_dates=reorder(big_cluster_dates,big_cluster_dates$max_date)
+
+p<-ggplot(big_cluster_dates, 
+       aes(
+           x = min_date, xend = max_date, y=entry)) +  
+  geom_dumbbell(size = 1.2,
+                size_x = 3, 
+                size_xend = 3,
+                colour = "grey", 
+                colour_x = "blue") +
+  theme_minimal() +theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+ggsave(p, file=paste(c(path, folder,"_lifetime_minsorted_all.png"),collapse=""), width=35, height=45)
+
+```
+
+``` {r}
+library(purrr)
+library(ggalt)
+library(lubridate)
+library(tidyverse)
+library(ggplot2)
+
+folder = "far20" # "far20"
+path = paste(c("C:/Users/Дмитрий/Documents/CMD/covid/gennady_tree/trans_lineages2/",folder ,"/"),collapse="")
+entrydates = read.csv2(file = paste(c(path, "/", folder, "_date_test_entry_included.dates_stats"),collapse=""),sep = "\t", header = T)
+cluster_dates = read.csv2(file = paste(c(path, "cluster_strains.dates_stats"),collapse=""),header = T, sep = "\t")
+cluster_dates = data.frame(entry = cluster_dates$entry, min_cluster_date = as.Date(cluster_dates$min_date, format = "%Y-%m-%d"), max_cluster_date = as.Date(cluster_dates$max_date, format = "%Y-%m-%d"))
+
+
+entrydates <-data.frame(entry = entrydates$entry, date = as.Date(entrydates$min_foreign_date, format = "%Y-%m-%d"), distance_to_closest_rus = entrydates$tree_distance_to_closest_rus_node)
+dates <-merge(entrydates, cluster_dates, by = "entry")
+dates$entry_sorted <- forcats::fct_reorder(dates$entry, as.Date(dates$date, format = "%Y-%m-%d"), .desc = TRUE)
+
+p<-ggplot(dates, 
+       aes(x = date, xend = max_cluster_date, y=entry_sorted)) +  
+  geom_dumbbell(size = 1.2,
+                size_x = 3, 
+                size_xend = 3,
+                colour = "gray",
+                colour_xend = "gray",
+                colour_x = "blue") +
+  theme_minimal() +theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+p
+ggsave(p, file=paste(c(path, "/", folder, "_entry_time_by_closest_foreign_dates_withlast.png"),collapse=""), width=35, height=45)
+```
+
+
+``` {r}
+library(purrr)
+library(ggalt)
+library(lubridate)
+library(tidyverse)
+library(ggplot2)
+library(broman)
+library(stringr)
+
+options(scipen=999)
+
+folder = "far20" # "far20"
+inner_folder = "treetime_noalign_min"
+path = paste(c("C:/Users/Дмитрий/Documents/CMD/covid/gennady_tree/transmission_lineages/",folder ,"/"),collapse="")
+alldates = read.csv2(file = paste(c(path,inner_folder, "/", "entry_to_date.csv"),collapse=""),sep = ",")
+colnames(alldates) = c("entry", "entry_name_in_nexus", "date")
+# !! used to be file = paste(c(path, "cluster_strains.dates_stats")
+cluster_dates = read.csv2(file = paste(c(path, inner_folder, "/", "cluster_strains.dates_stats"),collapse=""),header = T, sep = "\t")
+cluster_dates = data.frame(entry = cluster_dates$entry, min_cluster_date = as.Date(cluster_dates$min_date, format = "%Y-%m-%d"), max_cluster_date = as.Date(cluster_dates$max_date, format = "%Y-%m-%d"))
+# !! used to be paste(c(path, "/", folder, "_date_test_entry_included.dates_stats"),collapse="") 
+foreign_entrydates = read.csv2(file = paste(c(path, inner_folder, "/", "transmission_lineages.withduplicates.out.dates_stats"),collapse=""),sep = "\t", header = T)
+foreign_entrydates <-data.frame(entry = foreign_entrydates$entry, min_foreign_date = as.Date(foreign_entrydates$min_foreign_date, format = "%Y-%m-%d"), distance_to_closest_rus = as.numeric(foreign_entrydates$tree_distance_to_closest_rus_strain))
+
+dates <-data.frame(entry = alldates$entry, date = as.Date(format(date_decimal(as.numeric(alldates$date)), "%Y-%m-%d"), format = "%Y-%m-%d"))
+dates <-merge(dates, cluster_dates, by = "entry")
+dates <-merge(dates, foreign_entrydates, by = "entry")
+dates$entry_sorted <- forcats::fct_reorder(dates$entry, as.Date(dates$date, format = "%Y-%m-%d"), .desc = TRUE)
+
+
+colorcode <-function(length, whitedist = 0.002){
+  code = ""
+  if (length >= whitedist){code = "ff"}else{
+  code = dec2hex(as.integer(256*length/whitedist))}
+  code = stringr::str_pad(code, 2, side = "left", pad = 0)
+  return(paste(c("#", rep(code,3)), collapse = ""))
+}
+
+
+p<-ggplot(dates,  aes(x = date, xend = max_cluster_date, y=entry_sorted, color = sqrt(distance_to_closest_rus))) +
+  geom_dumbbell(size = 1.2,
+                size_x = 3, 
+                size_xend = 3,
+                colour_xend = "gray",
+                colour = "gray",
+                colour_x = "blue") +  geom_text(aes(label= round(distance_to_closest_rus, 6), y=entry_sorted,  x= max(as.Date(dates$max_cluster_date),na.rm = T), fontface="bold", size=3, family="Calibri")) + theme_minimal() +theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  
+ggsave(p, file=paste(c(path, inner_folder, "/", folder, "_", inner_folder, "_entry_time_withlast_distlabelled_sqrt.png"),collapse=""), width=35, height=45)
+
+p<-ggplot(dates,  aes(x = date, xend = min_cluster_date, y=entry_sorted, color = sqrt(distance_to_closest_rus))) +
+  geom_dumbbell(size = 1.2,
+                size_x = 3, 
+                size_xend = 3,
+                colour_xend = "red",
+                colour = "gray",
+                colour_x = "blue") +  geom_text(aes(label= round(distance_to_closest_rus, 6), y=entry_sorted,  x= max(as.Date(dates$max_cluster_date),na.rm = T), fontface="bold", size=3, family="Calibri")) + theme_minimal() +theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  
+ggsave(p, file=paste(c(path, inner_folder, "/", folder, "_", inner_folder, "_entry_time_withfirst_distlabelled_sqrt.png"),collapse=""), width=35, height=45)
+
+```
+
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
