@@ -10,7 +10,7 @@ def get_country_dict():
 	meta['country'] = 'Russia'
 	gismeta = pd.read_csv(options_meta, sep="\t")[['Accession ID', 'Location']]
 	gismeta.columns = ['seq_id', 'location']
-	gismeta['country'] = gismeta['location'].str.split(' / ',expand=True)[1]
+	gismeta['country'] = gismeta['location'].str.split('/',expand=True)[1].str.strip()
 	print(gismeta.head())
 	meta = pd.concat([meta, gismeta])
 	meta_dict = dict(zip(meta['seq_id'], meta['country']))
@@ -19,17 +19,17 @@ def get_country_dict():
 
 def get_date_dict():
 	print("Parsing metas..")
-	meta = pd.read_excel(options.rpn_meta)[['Внутренний номер', 'Дата забора']]
+	meta = pd.read_csv(options_rpn_meta, sep="\t")[['Внутренний номер', 'Дата забора']]
 	meta.columns = ['seq_id', 'date']
-	gismeta = pd.read_csv(options.meta, sep="\t")[['Accession ID', 'Collection date']]
+	gismeta = pd.read_csv(options_meta, sep="\t")[['Accession ID', 'Collection date']]
 	gismeta.columns = ['seq_id', 'date']
 	print(gismeta.head())
 	meta = pd.concat([meta, gismeta])
 	meta_dict = dict(zip(meta['seq_id'], meta['date']))
+	return(meta_dict)
 
 
 def get_gisaid_duplicates():
-	meta = pd.read_excel(options.rpn_meta)[['Внутренний номер', 'gisaid_id']]
+	meta = pd.read_csv(options_rpn_meta, sep="\t")[['Внутренний номер', 'gisaid_id']]
 	meta.columns = ['seq_id', 'gisaid_id']
-	gisaid_dupl = meta['gisaid_id'].tolist()
-	return(gisaid_dupl)
+	return(dict(zip(meta['seq_id'], meta['gisaid_id'])))
