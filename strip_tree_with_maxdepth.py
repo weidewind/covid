@@ -184,12 +184,11 @@ with open(options.entry_nodes_file, "r") as enf:
 			neighbours_collection = []
 			mark_and_collect_neighbours(t=tree, entry_node=entry_node, node=node, dist=dist, maxdist=options.max_distance, neighbours_collection=neighbours_collection)
 			strains_collection = []
+			strains_collection.extend(neighbours_collection)
 			for n in neighbours_collection:
-				strains_collection.append(n)
 				if n in duplicates:
-					for d in duplicates[n]:
-						strains_collection.append(d)
-			countries_collection = [countries_dict[n] for n in neighbours_collection]
+					strains_collection.extend(duplicates[n])
+			countries_collection = [countries_dict[n] for n in strains_collection]
 			stats = dict(Counter(countries_collection))
 			stats_str = ",".join([k + ":" + str(v) for k,v in stats.items()])
 			out.write("\t".join([stats_str, ",".join(countries_collection), ",".join([n for n in neighbours_collection])]) + "\n")

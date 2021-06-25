@@ -1,59 +1,80 @@
 from ete3 import Tree
 import pandas as pd
 from meta import get_country_dict
+import sys
 
+
+import optparse
+
+parser = optparse.OptionParser()
+parser.add_option('-r', '--rtr_duplicates_file', help='_rus_to_rus_dups.tsv', type='str')
+parser.add_option('-d', '--rtn_duplicates_file', help='_rus_to_nonrus_dups.tsv', type='str')
+parser.add_option('-n', '--ntn_duplicates_file', help='_nonrus_to_nonrus_dups.tsv', type='str')
+parser.add_option('-t', '--tree', help='_for_iqtree_3_-6.fasta.treefile', type='str')
+
+
+options, args = parser.parse_args()
 # check that all russian strains are russian, all non-russian strains are non-russian,
 # and that all  leader russian strains are present in the tree
 
-tree_file = "/export/home/popova/workspace/covid/data/munched/gennady/may31/21_05_2021_for_iqtree_3_-6.fasta.treefile"
-duplicates_file = "/export/home/popova/workspace/covid/data/munched/gennady/may31/21_05_2021_rus_to_rus_dups.tsv"
-rtn_duplicates_file = "/export/home/popova/workspace/covid/data/munched/gennady/may31/21_05_2021_rus_to_nonrus_dups.tsv"
-ntn_duplicates_file = "/export/home/popova/workspace/covid/data/munched/gennady/may31/21_05_2021_nonrus_to_nonrus_dups.tsv"
+#tree_file = "/export/home/popova/workspace/covid/data/munched/gennady/may31/21_05_2021_for_iqtree_3_-6.fasta.treefile"
+#rtr_duplicates_file = "/export/home/popova/workspace/covid/data/munched/gennady/may31/21_05_2021_rus_to_rus_dups.tsv"
+#rtn_duplicates_file = "/export/home/popova/workspace/covid/data/munched/gennady/may31/21_05_2021_rus_to_nonrus_dups.tsv"
+#ntn_duplicates_file = "/export/home/popova/workspace/covid/data/munched/gennady/may31/21_05_2021_nonrus_to_nonrus_dups.tsv"
 
-tree = Tree(tree_file, format = 1)
+tree = Tree(options.tree, format = 1)
 leaves_names = [n.name for n in tree.get_leaves()]
 
 meta_dict = get_country_dict()
 
 
 print("Parsing rus duplicates..")
-with open(duplicates_file, "r") as dfile:
+with open(options.rtr_duplicates_file, "r") as dfile:
 	for line in dfile:
 		splitter = line.strip().split('\t')
 		if splitter[0] not in leaves_names:
-			print(splitter[0] + " is not in the tree!")
+			sys.stderr.write(splitter[0] + " main strain from rus to rus duplicates file " + options.rtr_duplicates_file + " is not in the tree!")
+			raise
 		for d in splitter[1].split(";"):
 			if d in leaves_names:
-				print(d + " is a duplicate, but i found it in the tree!")
+				sys.stderr.write(d + " is a duplicate, but i found it in the tree!")
+				#raise
 		for s in splitter:
 			dups = s.split(';')
 			for d in dups:
 				if meta_dict.get(d, "NA") != "Russia":
-					print(d + " is not russian! " + meta_dict.get(d, "NA"))
+					sys.stderr.write(d + " from rus to rus duplicates file " + options.rtr_duplicates_file + " is not russian! " + meta_dict.get(d, "NA"))
+					raise
+					
 
 
 print("Parsing rus to nonrus duplicates..")
-with open(rtn_duplicates_file, "r") as dfile:
+with open(options.rtn_duplicates_file, "r") as dfile:
 	for line in dfile:
 		rus, nonrus = line.strip().split('\t')
 		if rus not in leaves_names:
-			print(rus + " is not in the tree!")
+			sys.stderr.write(rus + " is not in the tree!")
+			raise
 		if meta_dict.get(rus, "NA") != "Russia":
-				print(rus + " is not russian! " + meta_dict.get(rd, "NA"))
+				sys.stderr.write(rus + " main strain from rus to nonrus duplicates file " + options.rtn_duplicates_file + " is not russian! " + meta_dict.get(rd, "NA"))
+				raise
 		ndups = nonrus.split(';')
 		for nd in ndups:
 			if meta_dict.get(nd, "NA") == "Russia":
-				print(rd + " is  russian! " + meta_dict.get(nd, "NA"))
+				sys.stderr.write(rd + " duplicate strain from rus to nonrus duplicates file " + options.rtn_duplicates_file + "  is  russian! " + meta_dict.get(nd, "NA"))
+				raise
 			if nd in leaves_names:
-				print(nd + " is a duplicate, but i found it in the tree!")
+				sys.stderr.write(nd + " from rus to nonrus duplicates file " + options.rtn_duplicates_file + "  is a duplicate, but i found it in the tree!")
+				#raise
 
 
 print("Parsing nonrus duplicates..")
-with open(ntn_duplicates_file, "r") as dfile:
+with open(options.ntn_duplicates_file, "r") as dfile:
 	for line in dfile:
 		splitter = line.strip().split('\t')
 		for s in splitter:
 			dups = s.split(';')
 			for d in dups:
 				if meta_dict.get(d, "NA") == "Russia":
-					print(d + " is russian! " + meta_dict.get(d, "NA"))
+					sys.stderr.write(d + " from nonrus to nonrus duplicates file " + options.ntn_duplicates_file + " is russian! " + meta_dict.get(d, "NA"))
+					raise

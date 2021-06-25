@@ -18,7 +18,7 @@ options, args = parser.parse_args()
 lineages = {} # lineages{entry_node_name} = @strains
 
 
-def find_lineages(node, array, entry_nname):
+def find_primary_lineages(node, array, entry_nname):
 	array.append(node)
 	exported = entry_nname is not None and states[node.name] == 0
 	print("Processing node " + node.name + " with state 2 probability " + str(states[node.name]) + " and exproted = " + str(exported))
@@ -39,6 +39,34 @@ def find_lineages(node, array, entry_nname):
 				#else:
 					 #node.write(format=1, outfile=options.output + "_entry_" + node.name + ".newick")
 	if not node.is_leaf() and not exported:
+		for child in node.children:
+			array = find_lineages(child, array, entry_nname)
+	node = array.pop()
+	return(array)
+
+
+def find_lineages(node, array, entry_nname):
+	array.append(node)
+	exported = entry_nname is not None and states[node.name] == 0
+	if exported:
+		entry_nname = None
+	print("Processing node " + node.name + " with state 2 probability " + str(states[node.name]) + " and exproted = " + str(exported))
+	#print("Is it exported? " + str(exported))
+	#if len(lineages) > 0:
+	#	print("Lineage len " + str(len(lineages)))
+	if not exported and entry_nname is not None:
+		if node.is_leaf():
+			lineages[entry_nname].append(node.name)
+	if entry_nname is None:
+		if states[node.name] == 1:  # probability of being russian is 1
+			entry_nname = node.name
+			print("Lineage started at " + entry_nname)
+			lineages[entry_nname] = []
+			if node.is_leaf():
+				lineages[entry_nname].append(node.name)
+				#else:
+					 #node.write(format=1, outfile=options.output + "_entry_" + node.name + ".newick")
+	if not node.is_leaf():
 		for child in node.children:
 			array = find_lineages(child, array, entry_nname)
 	node = array.pop()

@@ -17,6 +17,7 @@ options, args = parser.parse_args()
 def dateStats(cleaned_od, quanttype):
 	if len(cleaned_od) == 0:
 		return ""
+	
 	output_dates_formatted = np.array(pd.to_datetime(cleaned_od, errors='coerce'), dtype=np.datetime64)
 	output_dates_formatted = output_dates_formatted[~ np.isnat(output_dates_formatted)]
 	output_dates_num = pd.to_numeric(output_dates_formatted)
@@ -26,7 +27,16 @@ def dateStats(cleaned_od, quanttype):
 	if quanttype == "mean":
 		return pd.to_datetime(np.mean(output_dates_num)).strftime("%Y-%m-%d")
 	if quanttype == "min":
-		print(pd.to_datetime(np.amin(output_dates_num)))
+		try:
+				print(pd.to_datetime(np.amin(output_dates_num)))
+		except:
+				print("Cleaned_od: ")
+				print(",".join(cleaned_od))
+				print("output_dates_formatted:")
+				print(",".join(output_dates_formatted))
+				print("output_dates_num:")
+				print(",".join(output_dates_num))
+				raise ValueError('oops')
 		return pd.to_datetime(np.amin(output_dates_num)).strftime("%Y-%m-%d")
 	if quanttype == "max":
 		return pd.to_datetime(np.amax(output_dates_num)).strftime("%Y-%m-%d")

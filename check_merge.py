@@ -1,30 +1,29 @@
 import pandas as pd
 from ete3 import Tree
 import re
+from meta import get_country_dict
+import optparse
 
-merged = "/export/home/popova/workspace/covid/data/munched/gennady/definitely_all_nonrus_duplicates_of_nonrus_strains_3"
-tree = "/export/home/popova/workspace/covid/data/munched/gennady/for_iqtree_far20.fasta.treefile.rerooted.rus_refluffed"
-options_rpn_meta = "/export/home/popova/workspace/covid/data/russian/meta_all.xlsx"
-options_meta = "/export/home/popova/workspace/covid/data/raw/metadata_2021-03-12_09-12.tsv"
+parser = optparse.OptionParser()
+parser.add_option('-m', '--merged', help='merged file for checking', type='str')
+parser.add_option('-t', '--tree', help='', type='str')
 
-print("Parsing metas..")
-meta = pd.read_excel(options_rpn_meta)[['Внутренний номер']]
-meta.columns = ['seq_id']
-meta['country'] = 'Russia'
-gismeta = pd.read_csv(options_meta, sep="\t")[['gisaid_epi_isl', 'country']]
-gismeta.columns = ['seq_id', 'country']
-print(gismeta.head())
-meta = pd.concat([meta, gismeta])
-meta_dict = dict(zip(meta['seq_id'], meta['country']))
+
+options, args = parser.parse_args()
+
+#merged = "/export/home/popova/workspace/covid/data/munched/gennady/definitely_all_nonrus_duplicates_of_nonrus_strains_3"
+#tree = "/export/home/popova/workspace/covid/data/munched/gennady/for_iqtree_far20.fasta.treefile.rerooted.rus_refluffed"
+
+meta_dict = get_country_dict()
 
 
 print("Parsing tree..")
-t = Tree(tree, format=1)
+t = Tree(options.tree, format=1)
 leaves = set([n.name for n in t.get_leaves()])
 print("there are " + str(len(leaves)) + " in the tree\n")
 
 print("Checking..")
-with open(merged) as m:
+with open(options.merged) as m:
 	for line in m:
 		splitter = line.strip().split("\t")
 		tsplitter = re.split(';|\t',line.strip())

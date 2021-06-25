@@ -19,7 +19,13 @@ parser.add_option('-o', '--output', help='output', type='str')
 
 options, args = parser.parse_args()
 
-
+def get_distance_to_parent(child, parent):
+	temp = child
+	dist = 0
+	while not temp.name == parent.name:
+		dist += temp.dist
+		temp = temp.up
+	return(dist)
 # def leaf_not_fully_russian(leaf):
 # 	country_set = list(set(leaf.country))
 # 	if len(country_set) > 1 or not country_set[0] == "Russia":
@@ -51,7 +57,7 @@ def any_leaf(leaf):
 
 
 def collectClosest(node, curdist, mindist, output_nodes, leaf_is_ok):  # curdepth - current distance to the leaf in question; mindist - best distance so far
-	print(" ".join(["node", node.name, "curdist", str(curdist), "mindist", str(mindist), "output_foreign_nodes", ",".join([n.name for n in output_nodes])]))
+	#print(" ".join(["node", node.name, "curdist", str(curdist), "mindist", str(mindist), "output_foreign_nodes", ",".join([n.name for n in output_nodes])]))
 	if node.is_leaf() and curdist <= mindist and leaf_is_ok(node):
 		if curdist < mindist:
 			output_nodes.clear()
@@ -60,10 +66,10 @@ def collectClosest(node, curdist, mindist, output_nodes, leaf_is_ok):  # curdept
 	elif curdist <= mindist:
 		for ch in node.children:
 			chdist = curdist + ch.dist
-			if chdist <= mindist:
+			if chdist <= mindist: ## add or output_nodes does not contain dates
 				(mindist, output_nodes) = collectClosest(ch, chdist, mindist, output_nodes, leaf_is_ok)
-		print("After traversing all children of node " + node.name + ":")
-		print(" ".join(["node", node.name, "curdist", str(curdist), "mindist", str(mindist), "output_foreign_nodes", ",".join([n.name for n in output_nodes])]))
+		#print("After traversing all children of node " + node.name + ":")
+		#print(" ".join(["node", node.name, "curdist", str(curdist), "mindist", str(mindist), "output_foreign_nodes", ",".join([n.name for n in output_nodes])]))
 	return(mindist, output_nodes)
 
 
@@ -87,15 +93,14 @@ def any_country(country):
 def collectDates(nodes, country_is_ok):
 	output_dates = []
 	corresponding_nodes = []
+	add_nodes_date = [dates_dict[n.name] for n in nodes if country_is_ok(countries_dict[n.name])]
+	output_dates.extend(add_nodes_date)
+	corresponding_nodes.extend([n for n in nodes if country_is_ok(countries_dict[n.name])])
 	for n in nodes:
-		if country_is_ok(countries_dict[n.name]):
-			output_dates.append(dates_dict[n.name])
-			corresponding_nodes.append(n)
 		if n.name in duplicates:
-			for d in duplicates[n.name]:
-				if d in countries_dict and country_is_ok(countries_dict[d]):
-					output_dates.append(dates_dict[d])
-					corresponding_nodes.append(n)
+			add_dates = [dates_dict.get(d,"unknown") for d in duplicates[n.name] if country_is_ok(countries_dict.get(d, "unknown"))]
+			output_dates.extend(add_dates)
+			corresponding_nodes.extend([n] * len(add_dates))
 	return output_dates, corresponding_nodes
 
 
@@ -163,29 +168,28 @@ with open(options.entry_nodes_file, "r") as enf:
 						output_foreign_nodes.append(ch)	
 						fmindist = 0
 
-			while(not tnode.is_root() and entry_node.get_distance(tnode) <= fmindist):
+			while(not tnode.is_root() and get_distance_to_parent(child=entry_node, parent=tnode) <= fmindist):
 				siss = tnode.get_sisters()
 				for s in siss:
-					print("sis " + s.name)
-					curdist = entry_node.get_distance(s)
+					#print("sis " + s.name)
+					curdist = get_distance_to_parent(child=entry_node, parent=tnode) + tnode.dist + s.dist
 					fmindist, output_foreign_nodes = collectClosest(s, curdist, fmindist, output_foreign_nodes, any_leaf)
 				tnode = tnode.up
 
-			print("Collected outgroup nodes:")
-			print(",".join([n.name for n in output_foreign_nodes]))
+			print("Collected outgroup nodes")
+			#print(",".join([n.name for n in output_foreign_nodes]))
 			dirty_foreign_dates, corresponding_dirty_foreign_nodes = collectDates(output_foreign_nodes, any_country)
 			# todo: highly unoptimal, should be rewritten
 			dist_foreign_mrca = []
 			dist_mrca_entry = []
 			temp_dict = {}
-			print("Dirty outgroup dates " + ",".join(dirty_foreign_dates))
-			print("Corr dirty outgroup nodes " + ",".join([fn.name for fn in corresponding_dirty_foreign_nodes]))
+			#print("Dirty outgroup dates " + ",".join(dirty_foreign_dates))
+			#print("Corr dirty outgroup nodes " + ",".join([fn.name for fn in corresponding_dirty_foreign_nodes]))
 			for fn in corresponding_dirty_foreign_nodes:
 				if fn.name not in temp_dict:
 					mrca = tree.get_common_ancestor(fn, entry_node)
-					print("mrca " + mrca.name)
-					dfm = mrca.get_distance(fn)
-					dme = mrca.get_distance(entry_node)
+					dfm = get_distance_to_parent(child = fn, parent = mrca)
+					dme = get_distance_to_parent(child = entry_node, parent = mrca)
 					dist_foreign_mrca.append(dfm)
 					dist_mrca_entry.append(dme)
 					temp_dict[fn.name] = [dfm, dme]
@@ -203,8 +207,8 @@ with open(options.entry_nodes_file, "r") as enf:
 			rmindist = maxdist
 			rmindist, output_rus_nodes = collectClosest(entry_node, 0, rmindist, output_rus_nodes, leaf_has_russians)
 
-			print("Collected rus nodes:")
-			print(",".join([n.name for n in output_rus_nodes]))
+			print("Collected rus nodes")
+			#print(",".join([n.name for n in output_rus_nodes]))
 
 			dirty_rus_dates, corresponding_dirty_rus_nodes = collectDates(output_rus_nodes, country_is_russia)
 			dirty_rus_num = len(dirty_rus_dates)

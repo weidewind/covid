@@ -1,4 +1,5 @@
 from meta import get_date_dict
+import datetime
 from ete3 import Tree
 import pandas as pd
 import optparse
@@ -24,8 +25,16 @@ with open(options.output, "w") as out:
 		date = re.sub('-XX', '', date)
 		if (len(date) < 10):
 			date = "unknown"
+		else:
+			try:
+				datetime.datetime.strptime(date, '%Y-%m-%d')
+			except ValueError:
+				try:
+					datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+				except ValueError:
+						print("Incorrect data format, should be YYYY-MM-DD [HH:MM:SS]: " + date)
+						date = "unknown"
 		out.write(strain + "\t" + date + "\n")
 	for leaf in tree.iter_leaves():
 		if leaf.name not in meta_dict:
 			out.write(leaf.name + "\t" + "unknown" + "\n")
-

@@ -15,15 +15,16 @@ meta_dict = get_country_dict()
 dup_list = {}
 centroid_for_strain = {}
 
-print("Parsing --nonrus_clusters..")
-with open(options.nonrus_clusters, "r") as clusts:
-	for line in clusts:
-		splitter = line.strip().split(';')
-		if len(splitter) > 1:
-			if not options.without_clusters:
-				dup_list[splitter[0]] = splitter[1:]
-			for strain in splitter[1:]:
-				centroid_for_strain[strain] = splitter[0]
+if not options.without_clusters:
+	print("Parsing --nonrus_clusters..")
+	with open(options.nonrus_clusters, "r") as clusts:
+		for line in clusts:
+			splitter = line.strip().split('\t')
+			if len(splitter) > 1:
+				strains = splitter[1].split(',')
+				dup_list[splitter[0]] = strains
+				for strain in strains:
+					centroid_for_strain[strain] = splitter[0]
 
 
 print("Parsing --nonrus_duplicates..")
