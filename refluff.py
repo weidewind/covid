@@ -12,6 +12,7 @@ options, args = parser.parse_args()
 
 print("Parsing tree..")
 tree = Tree(options.tree, format=1)
+leaves = tree.get_leaves()
 
 print("Parsing duplicates..")
 duplicates = {}
@@ -22,13 +23,16 @@ with open(options.duplicates, "r") as dfile:
 			duplicates[splitter[0]] = splitter[1].split(';')
 
 print("Adding duplicate leaves..")
-for leaf in tree.get_leaves():
+for leaf in leaves:
 	if leaf.name in duplicates:
 		leafn = leaf.name
 		leaf.name = "node_" + leaf.name
 		leaf.add_child(name=leafn, dist=0)
 		for dup in duplicates[leafn]:
-			leaf.add_child(name=dup, dist=0)
+			if dup not in leaves:
+				leaf.add_child(name=dup, dist=0)
+			else:
+				print("Duplicate " + dup + " is already present in the tree, won't add")
 
 print("Writing new tree..")
 tree.write(format=1, outfile=options.output)

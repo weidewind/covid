@@ -8,14 +8,16 @@ from ete3 import Tree, TreeStyle, NodeStyle, faces, AttrFace, CircleFace, TextFa
 from tree_utils import add_data_from_data_and_duplicates_files
 from datetime import datetime
 import webcolors
-
+from meta import get_date_dict
 
 
 parser = optparse.OptionParser()
 parser.add_option('-t', '--tree', help='tree file', type='str')
+parser.add_option('-d', '--dates', help='leaf_dates.csv', type='str')
 parser.add_option('-r', '--rusmeta', help='', type='str')
 parser.add_option('-n', '--nextmeta', help='', type='str')
 parser.add_option('-p', '--pangolined', help='', type='str')
+parser.add_option('-m', '--mode', help='c for circular or r for rectangular', type='str')
 parser.add_option('-o', '--output', help='', type='str')
 
 options, args = parser.parse_args()
@@ -47,13 +49,13 @@ def find_faded_color(nname, default_color, blending_color):
 		#now = datetime.now()
 		#diff = now - date
 		
-		diff = maxdate() - date
+		diff = latest_date - date
 		mydiff = round((diff.days-20)/30)
 		i = 0
 		while i < mydiff:
 			c = blend(c, blending_color)
 			i += 1
-		print(",".join([str(mydiff), c]))
+		#print(",".join([str(mydiff), c]))
 		return(c)
 
 
@@ -62,14 +64,14 @@ def blend(c1, c2):
 		c1 = str(webcolors.name_to_hex(c1))
 	if c2[0] != "#":
 		c2 = str(webcolors.name_to_hex(c2))
-	print(c1+" "+c2)
+	#print(c1+" "+c2)
 	r = int((int(("0x"+c1[1:3]),16)+int(("0x"+c2[1:3]),16))/0x2)
 	g = int((int(("0x"+c1[3:5]),16)+int(("0x"+c2[3:5]),16))/0x2)
 	b = int((int(("0x"+c1[5:]),16)+int(("0x"+c2[5:]),16))/0x2)
 	return("#"+str(hex(r))[2:].zfill(2)+str(hex(g))[2:].zfill(2)+str(hex(b)[2:].zfill(2)))
 
 
-def color_tree(t):
+def color_tree(t, size):
 	for node in t.traverse():
 		nstyle = NodeStyle()
 		nstyle["size"] = 0
@@ -88,13 +90,15 @@ def color_tree(t):
 				col = find_faded_color(node.name, "#777777", "#000000")
 				nstyle["fgcolor"] = col
 				nstyle["size"] = 4
-				if pango_dict[node.name] in ["B.1.1.523", "AT.1"]:
-					node.add_face(TextFace(node.name + " " + pango_dict[node.name], fgcolor="#000000",fsize = 50), column=0)
+				#if pango_dict[node.name] in ["B.1.1.523", "AT.1"]:
+				#	node.add_face(TextFace(node.name + " " + pango_dict[node.name], fgcolor="#000000",fsize = size), column=0)
 		node.set_style(nstyle)
 
 
 def maxdate():
-	return(datetime.strptime("2021-06-03", "%Y-%m-%d"))
+	alldates = [datetime.strptime(strdate, "%Y-%m-%d") for strdate in dates_dict.values() if strdate != "unknown"]
+	return(max(alldates))
+	#return(datetime.strptime("2021-06-03", "%Y-%m-%d"))
 
 # def maxdate():
 # 	#dates_num = pd.to_numeric(pd.Series(dates_dict.values()))
@@ -125,10 +129,14 @@ print(dict(list(country_dict.items())[0:5]))
 
 
 print("Parsing dates..")
-rusmeta = pd.read_csv(options.rusmeta, sep="\t")[['Внутренний номер', 'Дата забора']]
-rusmeta.columns = ['seq_id', 'date']
-dates_dict = dict(zip(rusmeta['seq_id'], rusmeta['date']))
+# rusmeta = pd.read_csv(options.rusmeta, sep="\t")[['Внутренний номер', 'Дата забора']]
+# rusmeta.columns = ['seq_id', 'date']
+# dates_dict = dict(zip(rusmeta['seq_id'], rusmeta['date']))
+dates_dict = get_date_dict(options.dates)
 print(dict(list(dates_dict.items())[0:5]))
+latest_date = maxdate()
+print("latest date: " + latest_date.strftime("%Y-%m-%d"))
+
  
 #B.1.1.451->B.1.1.523
 pango_color_dict = {"B.1.1.7":"blue", "B.1.351":"orange", "B.1.617.2":"red", "AT.1":"green", "B.1.1.523":"violet", "B.1.1.317":"lawngreen"}
@@ -146,23 +154,27 @@ pango_color_dict = {"B.1.1.7":"blue", "B.1.351":"orange", "B.1.617.2":"red", "AT
 # print(dict(list(dates_dict.items())[0:5]))
 
 
-
-print("Drawing trees..")
-
 print("Styling tree..")
-color_tree(tree)
-
 
 ts = TreeStyle()
-#ts.mode = "c"
+ts.mode = options.mode
 #ts.root_opening_factor = 1
 ts.show_leaf_name = False
+if options.mode == "r":
+	ts.scale = 100
+	size = 50
+else:
+	size = 300
 for lin in pango_color_dict:
-	ts.legend.add_face(CircleFace(30, pango_color_dict[lin]), column=0)
-	ts.legend.add_face(TextFace(lin, fsize = 50), column=1)
-ts.legend.add_face(TextFace("last date: " + maxdate().strftime("%Y-%m-%d"), fsize = 50), column=0) 
+	ts.legend.add_face(CircleFace(size, pango_color_dict[lin]), column=0)
+	ts.legend.add_face(TextFace(lin, fsize = size), column=1)
+ts.legend.add_face(TextFace("last date: " + latest_date.strftime("%Y-%m-%d"), fsize = size), column=1) 
 #ts.layout_fn = multiple_country_layout
-ts.scale = 100
+
+
+color_tree(tree, size)
+
+
 tree.ladderize()
 tree.render(options.output + ".svg", tree_style=ts, dpi=300, w=10000, units="mm")
 tree.render(options.output + ".pdf", tree_style=ts, dpi=300, w=10000, units="mm")

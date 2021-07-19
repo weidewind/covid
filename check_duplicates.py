@@ -2,8 +2,6 @@ from ete3 import Tree
 import pandas as pd
 from meta import get_country_dict
 import sys
-
-
 import optparse
 
 parser = optparse.OptionParser()
@@ -14,13 +12,10 @@ parser.add_option('-t', '--tree', help='_for_iqtree_3_-6.fasta.treefile', type='
 
 
 options, args = parser.parse_args()
-# check that all russian strains are russian, all non-russian strains are non-russian,
-# and that all  leader russian strains are present in the tree
 
-#tree_file = "/export/home/popova/workspace/covid/data/munched/gennady/may31/21_05_2021_for_iqtree_3_-6.fasta.treefile"
-#rtr_duplicates_file = "/export/home/popova/workspace/covid/data/munched/gennady/may31/21_05_2021_rus_to_rus_dups.tsv"
-#rtn_duplicates_file = "/export/home/popova/workspace/covid/data/munched/gennady/may31/21_05_2021_rus_to_nonrus_dups.tsv"
-#ntn_duplicates_file = "/export/home/popova/workspace/covid/data/munched/gennady/may31/21_05_2021_nonrus_to_nonrus_dups.tsv"
+
+# check that all russian strains are russian, all non-russian strains are non-russian,
+# and that all leader russian strains are present in the tree, and duplicates are not present in the tree
 
 tree = Tree(options.tree, format = 1)
 leaves_names = [n.name for n in tree.get_leaves()]

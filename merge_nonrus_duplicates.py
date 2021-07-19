@@ -4,7 +4,7 @@ import optparse
 
 parser = optparse.OptionParser()
 parser.add_option('-n', '--nonrus_duplicates', help='file nonrus.duplicates, with kinda duplicates', type='str')
-parser.add_option('-c', '--nonrus_clusters', help='file nonrus_clusters_far20.txt', type='str')
+parser.add_option('-c', '--nonrus_clusters', help='file nonrus_clusters_far20.txt', type='str', default='')
 parser.add_option('-w', '--without_clusters', action="store_true", default=False)
 parser.add_option('-o', '--output', help='output', type='str')
 

@@ -16,13 +16,14 @@ seqlength=$( grep ">" -n -m 2 $rus_fasta | tail -1 | cut -d":" -f1 | xargs -I{} 
 echo "Sequence length is ${seqlength}"
 echo "Branch lengths are given in ${branchlength}"
 
+python rename_leaves.py --tree $rawtree --meta $merged_meta --long_ids $long_ids --output $tree
 #check for some obvious country-connected bullshit
+
 echo "Reading tree $tree"
 start=`date +%s`
 python check_duplicates.py --rtr_duplicates $rus_to_rus_duplicates --rtn_duplicates $rus_to_nonrus_duplicates --ntn_duplicates $nonrus_to_nonrus_duplicates --tree $tree
 echo "Merging duplicates.."
 python merge_rus_duplicates.py --rtr_duplicates $rus_to_rus_duplicates --rtn_duplicates $rus_to_nonrus_duplicates --output $rus_duplicates
-python merge_nonrus_duplicates.py --nonrus_duplicates $nonrus_to_nonrus_duplicates --nonrus_clusters $nonrus_clusters --output $nonrus_duplicates
 python merge_nonrus_duplicates.py --nonrus_duplicates $nonrus_to_nonrus_duplicates --nonrus_clusters $nonrus_clusters --without_clusters --output $nonrus_duplicates_wo_clusters
 #python check_merge.py # far20 hard-coded inside, change it to check other trees (and probably #todo make everything fall if it does not pass)
 
@@ -47,13 +48,13 @@ runtime=$( echo "$end - $start" | bc -l )
 echo "states reconstructed in "$((runtime/60))" min "
 echo "Searching for transmission lineages.." 
 start=`date +%s`
-python find_transmission_lineages.py --print_broader_subtree -1 --duplicates $nonrus_duplicates --tree ${all_states_file}.newick --states ${all_states_file}.probs  --countries $leaf_states_file --output $translin_file >${translin_file}.log 2>>${translin_file}.errlog
+python find_transmission_lineages.py --print_broader_subtree -1 --duplicates $nonrus_duplicates_wo_clusters --tree ${all_states_file}.newick --states ${all_states_file}.probs  --countries $leaf_states_file --output $translin_file >${translin_file}.log 2>>${translin_file}.errlog
 end=`date +%s`
 runtime=$( echo "$end - $start" | bc -l )
 echo "transmission lineages found in "$((runtime/60))" min "
 echo "Collecting country statistics.."
 start=`date +%s`
-parallel python -u country_stat.py --duplicates $nonrus_duplicates --tree ${all_states_file}.newick --states ${all_states_file}.probs --countries $leaf_states_file --entry_nodes_file ${translin_file}.entries --max_distance {} --output ${country_stat_file}.{} >${country_stat_file}.logger.{} ::: 0 1 2 3 4 5 6
+parallel python -u country_stat.py --duplicates $nonrus_duplicates_wo_clusters --tree ${all_states_file}.newick --states ${all_states_file}.probs --countries $leaf_states_file --entry_nodes_file ${translin_file}.entries --max_distance {} --output ${country_stat_file}.{} >${country_stat_file}.logger.{} ::: 0 1 2 3 4 5 6
 end=`date +%s`
 runtime=$( echo "$end - $start" | bc -l )
 echo "country stats collected in "$((runtime/60))" min "
@@ -146,7 +147,7 @@ mkdir -p $output_folder/trees
 start=`date +%s`
 xvfb-run python draw_stripped_pangolineages_of_interest.py --lineages_list $important_lineages \
 --pangostats_file ${pangolin_output_folder}/${gentag}_pangolin_counts_for_entry.csv --tree ${all_states_file}.newick \
---steps 3 --countries $leaf_states_file --duplicates $nonrus_duplicates --dates $leaf_dates_file \
+--steps 3 --countries $leaf_states_file --duplicates $nonrus_duplicates_wo_clusters --dates $leaf_dates_file \
 --pangolined $rus_pangolined --states ${all_states_file}.probs --entries_file $translin_file \
 --output ${output_folder}/trees/${gentag}_entries_of_interest
 end=`date +%s`
@@ -157,7 +158,7 @@ echo "stripped pangolineages of interest drawn in "$((runtime/60))" min "
 echo "Defluffing the tree ${all_states_file}.newick.."
 #add strains that were removed by defluffing (one foreign duplicate of russian strain is preserved in the tree, and all others are now added to duplicates file as duplicates of the preserved strain )
 python defluff.py --tree ${all_states_file}.newick --duplicates $rus_to_nonrus_duplicates --output ${output_folder}/defluffed
-cp $nonrus_duplicates $nonrus_duplicates_after_defluffing
+cp $nonrus_duplicates_wo_clusters $nonrus_duplicates_after_defluffing
 cat "${output_folder}/defluffed.duplicates" >>$nonrus_duplicates_after_defluffing
 xvfb-run python strip_tree_on_closest.py --tree ${output_folder}/defluffed.newick --dates $leaf_dates_file --countries $leaf_states_file --duplicates $nonrus_duplicates_after_defluffing --entry_nodes_file ${translin_file}.entries --output ${output_folder}/defluffed_and_stripped
 
