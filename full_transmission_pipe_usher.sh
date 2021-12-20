@@ -21,7 +21,7 @@ python rename_leaves.py --tree $rawtree --meta $merged_meta --long_ids $long_ids
 
 echo "Reading tree $tree"
 start=`date +%s`
-python check_duplicates.py --rtr_duplicates $rus_to_rus_duplicates --rtn_duplicates $rus_to_nonrus_duplicates --ntn_duplicates $nonrus_to_nonrus_duplicates --tree $tree
+#python check_duplicates.py --rtr_duplicates $rus_to_rus_duplicates --rtn_duplicates $rus_to_nonrus_duplicates --ntn_duplicates $nonrus_to_nonrus_duplicates --tree $tree
 echo "Merging duplicates.."
 python merge_rus_duplicates.py --rtr_duplicates $rus_to_rus_duplicates --rtn_duplicates $rus_to_nonrus_duplicates --output $rus_duplicates
 python merge_nonrus_duplicates.py --nonrus_duplicates $nonrus_to_nonrus_duplicates --nonrus_clusters $nonrus_clusters --without_clusters --output $nonrus_duplicates_wo_clusters
@@ -109,6 +109,7 @@ mkdir -p $pangolin_output_folder
 source $conda_config
 conda activate pangolin
 pangolin $rus_fasta --outfile $rus_pangolined
+python pango_add_duplicates_anarchy.py --pango_file $rus_pangolined --duplicates_file $rus_to_rus_duplicates --output $rus_withdups_pangolined
 conda deactivate
 conda activate base
 end=`date +%s`
@@ -117,14 +118,14 @@ echo "Pangolining performed in "$((runtime/60))" min "
 
 echo "Drawing pangolin plots.." 
 start=`date +%s`
-Rscript pangostat.R --pangolined_file $rus_pangolined --entry_file ${translin_file} --important_lineages $important_lineages --output_folder $pangolin_output_folder --tag $gentag
+Rscript pangostat.R --pangolined_file $rus_withdups_pangolined --entry_file ${translin_file} --important_lineages $important_lineages --output_folder $pangolin_output_folder --tag $gentag
 end=`date +%s`
 runtime=$( echo "$end - $start" | bc -l )
 echo "Pangolin plots drawn in "$((runtime/60))" min "
 
 
 echo "Drawing fortnight and rug plots.."
-#instead of #Rscript analyze_dates.R --pangolined_file $rus_pangolined  --cluster_dates_file ${output_folder}/cluster_strains.dates_stats --entry_strains_file ${translin_file} --entry_dates_file ${translin_file}.dates_stats --important_lineages $important_lineages --output_folder $pangolin_output_folder --tag $gentag
+#instead of #Rscript analyze_dates.R --pangolined_file $rus_withdups_pangolined  --cluster_dates_file ${output_folder}/cluster_strains.dates_stats --entry_strains_file ${translin_file} --entry_dates_file ${translin_file}.dates_stats --important_lineages $important_lineages --output_folder $pangolin_output_folder --tag $gentag
 start=`date +%s`
 for i in $( seq 1 $((threads+1)) )
 do
@@ -137,7 +138,7 @@ for i in $( seq 2 $((threads+1)) )
 	tail -n +2 ${translin_file}.part${i}.dates_stats.corrected.${gentag}.csv >>${translin_file}.dates_stats.corrected.${gentag}.csv
 	done
 
-Rscript rug_plots.R --corrected_dates_file ${translin_file}.dates_stats.corrected.${gentag}.csv --entry_dates_file ${translin_file}.dates_stats --pangolined_file $rus_pangolined --cluster_dates_file ${output_folder}/cluster_strains.dates_stats --entry_strains_file ${translin_file} --important_lineages $important_lineages --output_folder $pangolin_output_folder --tag $gentag
+Rscript rug_plots.R --corrected_dates_file ${translin_file}.dates_stats.corrected.${gentag}.csv --entry_dates_file ${translin_file}.dates_stats --pangolined_file $rus_withdups_pangolined --cluster_dates_file ${output_folder}/cluster_strains.dates_stats --entry_strains_file ${translin_file} --important_lineages $important_lineages --output_folder $pangolin_output_folder --tag $gentag
 end=`date +%s`
 runtime=$( echo "$end - $start" | bc -l )
 echo "Fortnight and rug plots drawn in "$((runtime/60))" min "
@@ -148,7 +149,7 @@ start=`date +%s`
 xvfb-run python draw_stripped_pangolineages_of_interest.py --lineages_list $important_lineages \
 --pangostats_file ${pangolin_output_folder}/${gentag}_pangolin_counts_for_entry.csv --tree ${all_states_file}.newick \
 --steps 3 --countries $leaf_states_file --duplicates $nonrus_duplicates_wo_clusters --dates $leaf_dates_file \
---pangolined $rus_pangolined --states ${all_states_file}.probs --entries_file $translin_file \
+--pangolined $rus_withdups_pangolined --states ${all_states_file}.probs --entries_file $translin_file \
 --output ${output_folder}/trees/${gentag}_entries_of_interest
 end=`date +%s`
 runtime=$( echo "$end - $start" | bc -l )

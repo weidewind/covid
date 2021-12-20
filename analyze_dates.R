@@ -1,26 +1,17 @@
 #!/usr/bin/env Rscript
 
-# libproj and/or proj.h/proj_api.h not found in standard search locations
-# Install PROJ library and if necessary set PKG_CPPFLAGS/PKG_LIBS accordingly
-# Solution:
-# devtools::install_github("hrbrmstr/ggalt", ref = "noproj", lib="~/R/library/")
-
 library("optparse")
 library(plyr)
 library(lubridate)
-library(ggplot2)
-library(ggalt)
 
 option_list = list(
 			make_option(c("-o", "--output_folder"), type="character", default="", 
               help="", metavar="character"),
 			make_option(c("-d", "--entry_dates_file"), type="character", default="", 
               help="", metavar="character"),
-			make_option(c("-t", "--tag"), type="character", default="", 
-              help="gentag to start output file names with ", metavar="character"),
 			make_option(c("-b", "--branchlength"), type="character", default="", 
-              help="subs or subs_per_site? ", metavar="character")
-			make_option(c("-s", "--seqlength"), type="character", default="", 
+              help="subs or subs_per_site", metavar="character"),
+			make_option(c("-s", "--seqlength"), type="numeric", default="", 
               help="if branchlength is in subs, we need seqlength", metavar="character")
 ); 
  
@@ -52,11 +43,11 @@ mean_all = apply(entrydates, 1, function(row){
 print("Calculating corrected dates..")
 
 corrected_dates = apply(entrydates, 1, function(row){
-	print(row["entry"])
+	  #print(row["entry"])
       df = data.frame(ftm = unlist(strsplit(row["tree_distance_foreign_to_mrca"], ",")), mte = unlist(strsplit(row["tree_distance_foreign_mrca_to_entry"], ",")), fd = ymd(unlist(strsplit(row["close_foreign_dates"], ","))))
       df = df[!is.na(df$fd),]
       # Now from each foreign strain (ie, for each row in the dataframe df) we compute the date of entry
-	  print(head(df))
+	  #print(head(df))
       r <- apply(df, 1, function(r){
         res = ymd(r["fd"]) + dyears((as.numeric(r["mte"])- as.numeric(r["ftm"]))/(seqlength*clock_rate))
       # convert to character, because otherwise it is auto-converted to numeric  
@@ -76,8 +67,7 @@ print(str(corrected_dates))
 # Estimate entry date by close foreign strains AND close rus strains dates and lengths of corresponding branches
 print("Calculating all corrected dates..")
 all_corrected_dates = apply(entrydates, 1, function(row){
-  print(row["entry"])
-
+  #print(row["entry"])
   df = data.frame(ftm = unlist(strsplit(row["tree_distance_foreign_to_mrca"], ",")), mte = unlist(strsplit(row["tree_distance_foreign_mrca_to_entry"], ",")), fd = ymd(unlist(strsplit(row["close_foreign_dates"], ","))))
   df = df[!is.na(df$fd) ,]
   # Now from each foreign strain (ie, for each row in the dataframe df) we compute the date of entry
@@ -112,10 +102,10 @@ print(str(all_corrected_dates))
 # This results in 2 median values; return their mean
 print("Calculating all grouped corrected dates..")
 all_grouped_corrected_mean = apply(entrydates, 1, function(row){
-  print(row["entry"])
+  #print(row)
   frm = NULL  
 
-      df = data.frame(ftm = unlist(strsplit(row["tree_distance_foreign_to_mrca"], ",")), mte = unlist(strsplit(row["tree_distance_foreign_mrca_to_entry"], ",")), fd = ymd(unlist(strsplit(row["close_foreign_dates"], ","))))
+      df = data.frame(ftm = unlist(strsplit(as.character(row["tree_distance_foreign_to_mrca"]), ",")), mte = unlist(strsplit(as.character(row["tree_distance_foreign_mrca_to_entry"]), ",")), fd = ymd(unlist(strsplit(as.character(row["close_foreign_dates"]), ","))))
       df = df[!is.na(df$fd) ,]
       # Now from each foreign strain (ie, for each row in the dataframe df) we compute the date of entry
       fr <- apply(df, 1, function(r){
@@ -127,18 +117,21 @@ all_grouped_corrected_mean = apply(entrydates, 1, function(row){
       names(fr) <-NULL
 
 
-      rdf = data.frame(rtm = unlist(strsplit(row["tree_distance_rus_to_mrca"], ",")), mte = unlist(strsplit(row["tree_distance_rus_mrca_to_entry"], ",")), fd = ymd(unlist(strsplit(row["close_rus_dates"], ","))))
-      rdf = rdf[!is.na(rdf$rdf),]
+      rdf = data.frame(ftm = unlist(strsplit(as.character(row["tree_distance_rus_to_mrca"]), ",")), mte = unlist(strsplit(as.character(row["tree_distance_rus_mrca_to_entry"]), ",")), fd = ymd(unlist(strsplit(as.character(row["close_rus_dates"]), ","))))
+      rdf = rdf[!is.na(rdf$fd),]
       rr <- apply(rdf, 1, function(r){
         res = ymd(r["fd"]) + dyears((as.numeric(r["mte"])- as.numeric(r["ftm"]))/(seqlength*clock_rate))
         substr(as.character(res), 0,10)
       })
       names(rr) <-NULL
       
-      frm = median(as.Date(fr,format = "%Y-%m-%d"), na.rm = TRUE) 
-      rrm = median(as.Date(rr,format = "%Y-%m-%d"), na.rm = TRUE) 
-      as.character(mean(c(frm, rrm),na.rm = TRUE))
+      frm = min(as.Date(fr,format = "%Y-%m-%d"), na.rm = TRUE) 
+      rrm = min(as.Date(rr,format = "%Y-%m-%d"), na.rm = TRUE) 
+      res = as.character(mean(c(frm, rrm),na.rm = TRUE))
+	  data.frame(corrected_foreign = paste(fr, collapse=","),corrected_rus = paste(rr, collapse=","),corrected_grouped_mean_all = res)
 })
+all_grouped_corrected_mean = ldply(all_grouped_corrected_mean, function(r){data.frame(r)})
+#colnames(all_grouped_corrected_mean) = c("entry", "corrected_foreign", "corrected_rus","corrected_grouped_mean_all")
 
 print("All Grouped Corrected mean:")
 print(str(all_grouped_corrected_mean))
@@ -198,17 +191,18 @@ counts<-sapply(all_corrected_dates, length)
 
 
 cordates_df <- data.frame(entry = entrydates$entry, 
-                          median = as.Date(medians, format = "%Y-%m-%d"), mean = as.Date(means, format = "%Y-%m-%d"),
-                          min = as.Date(mins, format = "%Y-%m-%d"),
+                          corrected_median_foreign = as.Date(medians, format = "%Y-%m-%d"), corrected_mean_foreign = as.Date(means, format = "%Y-%m-%d"),
+                          corrected_min_foreign = as.Date(mins, format = "%Y-%m-%d"),
                           mean_all =as.Date(mean_all, format = "%Y-%m-%d"), 
-                          date_count = counts, min_foreign_date = as.Date(entrydates$min_foreign_date, format = "%Y-%m-%d"), 
+                          date_count = counts, min_foreign = as.Date(entrydates$min_foreign_date, format = "%Y-%m-%d"), 
                           corrected_median_all =as.Date(all_corrected_medians, format = "%Y-%m-%d"),
                           corrected_mean_all =as.Date(all_corrected_means, format = "%Y-%m-%d"),
-                          corrected_grouped_mean_all = as.Date(all_grouped_corrected_mean, format = "%Y-%m-%d"),
-                          date_count = counts, min_foreign_date = as.Date(entrydates$min_foreign_date, format = "%Y-%m-%d"),
-                          median_foreign_date =  as.Date(entrydates$median_foreign_date, format = "%Y-%m-%d"))
+                          corrected_grouped_mean_all = as.Date(all_grouped_corrected_mean$corrected_grouped_mean_all, format = "%Y-%m-%d"),
+						  corrected_foreign = all_grouped_corrected_mean$corrected_foreign,
+						  corrected_rus = all_grouped_corrected_mean$corrected_rus,
+                          median_foreign =  as.Date(entrydates$median_foreign_date, format = "%Y-%m-%d"))
 
 # write it down for later use
 print("Writing corrected entry dates to file..")
-write.csv2(cordates_df, paste(c(opt$entry_dates_file, ".corrected.", opt$tag, ".csv"), collapse = ""), quote = F, row.names = F)
+write.csv2(cordates_df, paste(c(opt$entry_dates_file, ".corrected.csv"), collapse = ""), quote = F, row.names = F)
 

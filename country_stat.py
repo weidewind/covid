@@ -19,9 +19,9 @@ import re
 
 parser = optparse.OptionParser()
 parser.add_option('-t', '--tree', help='tree file', type='str')
-parser.add_option('-s', '--states', help='states file', type='str')
+parser.add_option('-i', '--include_inner', action="store_true", dest='include_inner', default=False)
 parser.add_option('-c', '--countries', help='file with ids and countries, output from meta_to_states.py', type='str')
-parser.add_option('-d', '--duplicates', help='states file', type='str')
+parser.add_option('-d', '--duplicates', help='', type='str')
 parser.add_option('-m', '--max_distance', help='maximum phylogenetic distance from entry node', type='float')
 parser.add_option('-e', '--entry_nodes_file', help='file with entry nodes (one per line, output from find_transmission_lineages.py)', type='str')
 parser.add_option('-o', '--output', help='output', type='str')
@@ -29,24 +29,24 @@ parser.add_option('-o', '--output', help='output', type='str')
 options, args = parser.parse_args()
 
 
-def collect_neighbours(t, entry_node, node, dist, maxdist, neighbours_collection, distances_collection, mrca_collection, entry_parents, mrca):
-	if (node.name not in entry_parents):
-		dist += node.dist
-	else:
-		dist -= node.dist
-		mrca = node
+def collect_neighbours(t, entry_node, node, dist, maxdist, neighbours_collection, distances_collection, mrca_collection, entry_parents, mrca, include_inner):
+    if (node.name not in entry_parents):
+        dist += node.dist
+    else:
+        dist -= node.dist
+        mrca = node
 
-	if (dist <= maxdist):
-		if not node == entry_node:
-			if node.is_leaf():
-				neighbours_collection.append(node.name)
-				distances_collection.append(dist)
-				mrca_collection.append(mrca.name)
-				#print("Appended " + node.name + " at " + str(dist) + " with mrca " + mrca.name)
+    if (dist <= maxdist):
+        if not node == entry_node or include_inner:
+            if node.is_leaf() and not node == entry_node:
+                neighbours_collection.append(node.name)
+                distances_collection.append(dist)
+                mrca_collection.append(mrca.name)
+                #print("Appended " + node.name + " at " + str(dist) + " with mrca " + mrca.name)
 
-			else:
-				for ch in node.children:
-					collect_neighbours(t, entry_node, ch, dist, maxdist, neighbours_collection, distances_collection, mrca_collection, entry_parents, mrca)
+            else:
+                for ch in node.children:
+                    collect_neighbours(t, entry_node, ch, dist, maxdist, neighbours_collection, distances_collection, mrca_collection, entry_parents, mrca, include_inner)
 
 
 
@@ -58,64 +58,76 @@ countries = pd.read_csv(options.countries, sep="\t", names=['seq_id', 'state', '
 countries_dict = dict(zip(countries['seq_id'], countries['region']))
 print(dict(list(countries_dict.items())[0:5]))
 
-print("Parsing duplicates..")
-duplicates = {}
-with open(options.duplicates, "r") as dfile:
-	for line in dfile:
-		splitter = line.strip().split('\t')
-		if len(splitter) > 1:
-			duplicates[splitter[0]] = splitter[1].split(';')
+if options.duplicates:
+    print("Parsing duplicates..")
+    duplicates = {}
+    with open(options.duplicates, "r") as dfile:
+        for line in dfile:
+            splitter = line.strip().split('\t')
+            if len(splitter) > 1:
+                duplicates[splitter[0]] = splitter[1].split(';')
 
 
 print("Collecting neighbours.. ")
 entries = []
 with open(options.entry_nodes_file, "r") as enf:
-	with open(options.output + ".country_stats", "w") as out:
-		out.write("\t".join(["entry", "number_of_closest_strains", "closest_countries_stats", "closest_countries", "closest_nodes", "distances", "etm_distances"]) + "\n")
-		for line in enf:
-			print(">entry_node " + line.strip())
-			out.write(line.strip() + "\t")
-			entry_node = tree.search_nodes(name=line.strip())[0]
-			entries.append(entry_node.name)
-			node = entry_node
-			dist = node.dist
-			mrca_dist_dict = {}
-			while dist < options.max_distance and not node.is_root():
-				node = node.up
-				mrca_dist_dict[node.name] = dist
-				dist += node.dist #its ok to add the last distance too - we will subtract it later, in mark_and_collect_neighbours
-				
+    with open(options.output + ".country_stats", "w") as out:
+        out.write("\t".join(["entry", "number_of_closest_strains", "closest_countries_stats", "closest_countries", "closest_nodes", "distances", "etm_distances", "rus_count", "foreign_count"]) + "\n")
+        for line in enf:
+            print(">entry_node " + line.strip())
+            out.write(line.strip() + "\t")
+            entry_node = tree.search_nodes(name=line.strip())[0]
+            entries.append(entry_node.name)
+            node = entry_node
+            dist = node.dist
+            mrca_dist_dict = {}
+            if options.include_inner:
+                mrca_dist_dict[node.name] = 0
+            while dist < options.max_distance and not node.is_root():
+                node = node.up
+                mrca_dist_dict[node.name] = dist
+                dist += node.dist #its ok to add the last distance too - we will subtract it later, in mark_and_collect_neighbours
+                
 
-			entry_parents = [entry_node.name]
-			pnode = entry_node
-			while not pnode.is_root():
-				pnode = pnode.up
-				entry_parents.append(pnode.name)
+            entry_parents = [entry_node.name]
+            pnode = entry_node
+            while not pnode.is_root():
+                pnode = pnode.up
+                entry_parents.append(pnode.name)
 
 
-			neighbours_collection = []
-			distances_collection = []
-			mrca_collection = []
-			collect_neighbours(t=tree, entry_node=entry_node, node=node, dist=dist, maxdist=options.max_distance, distances_collection=distances_collection, neighbours_collection=neighbours_collection, mrca_collection=mrca_collection, mrca=node, entry_parents=set(entry_parents))
-			strains_collection = []
-			strains_dist_collection = []
-			strains_etmdist_collection = []
-			strains_collection.extend(neighbours_collection)
-			strains_dist_collection.extend(distances_collection)
-			strains_etmdist_collection.extend([mrca_dist_dict[mname] for mname in mrca_collection])
-			
-			for ind, n in enumerate(neighbours_collection):
-				if n in duplicates:
-					dups = duplicates[n]
-					strains_collection.extend(dups)
-					print("dups " + ",".join(dups))
-					print("ind " + str(ind))
-					print("dist " + str(distances_collection[ind]))
-					strains_dist_collection.extend([distances_collection[ind]]*len(dups))
-					strains_etmdist_collection.extend([mrca_dist_dict[mrca_collection[ind]]]*len(dups))
+            neighbours_collection = []
+            distances_collection = []
+            mrca_collection = []
+            collect_neighbours(t=tree, entry_node=entry_node, node=node, dist=dist, maxdist=options.max_distance, distances_collection=distances_collection, neighbours_collection=neighbours_collection, mrca_collection=mrca_collection, mrca=node, entry_parents=set(entry_parents), include_inner=options.include_inner)
+            strains_collection = []
+            strains_dist_collection = []
+            strains_etmdist_collection = []
+            strains_collection.extend(neighbours_collection)
+            strains_dist_collection.extend(distances_collection)
+            strains_etmdist_collection.extend([mrca_dist_dict[mname] for mname in mrca_collection])
+            
+            if options.duplicates:
+                for ind, n in enumerate(neighbours_collection):
+                    if n in duplicates:
+                        dups = duplicates[n]
+                        strains_collection.extend(dups)
+                        print("dups " + ",".join(dups))
+                        print("ind " + str(ind))
+                        print("dist " + str(distances_collection[ind]))
+                        strains_dist_collection.extend([distances_collection[ind]]*len(dups))
+                        strains_etmdist_collection.extend([mrca_dist_dict[mrca_collection[ind]]]*len(dups))
 
-			countries_collection = [countries_dict.get(n, "unknown") for n in strains_collection]
-			stats = dict(Counter(countries_collection))
-			stats_str = ",".join([k + ":" + str(v) for k,v in stats.items()])
-			out.write("\t".join([str(len(countries_collection)), stats_str, ",".join(countries_collection), ",".join([n for n in strains_collection]), ",".join([str(round(n,11)) for n in strains_dist_collection]), ",".join([str(round(n,11)) for n in strains_etmdist_collection])]) + "\n")
+            countries_collection = [countries_dict.get(n, "unknown") for n in strains_collection]
+            stats = dict(Counter(countries_collection))
+            stats_str = ",".join([k + ":" + str(v) for k,v in stats.items()])
+            rus_count = stats.get("Russia", 0)
+            unknown_count = stats.get("unknown", 0)
+            foreign_count = sum(stats.values()) - rus_count - unknown_count
+            out.write("\t".join([str(len(countries_collection)), stats_str, 
+                                 ",".join(countries_collection),
+                                 ",".join([n for n in strains_collection]),
+                                 ",".join([str(round(n, 11)) for n in strains_dist_collection]),
+                                 ",".join([str(round(n, 11)) for n in strains_etmdist_collection]),
+                                 str(rus_count), str(foreign_count)]) + "\n")
 

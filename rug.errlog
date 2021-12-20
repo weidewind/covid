@@ -1,0 +1,50 @@
+sys:1: DtypeWarning: Columns (5,13,16) have mixed types.Specify dtype option on import or set low_memory=False.
+sys:1: DtypeWarning: Columns (1,4,5) have mixed types.Specify dtype option on import or set low_memory=False.
+
+Attaching package: ‘lubridate’
+
+The following objects are masked from ‘package:base’:
+
+    date, intersect, setdiff, union
+
+Registered S3 methods overwritten by 'ggalt':
+  method                  from   
+  grid.draw.absoluteGrob  ggplot2
+  grobHeight.absoluteGrob ggplot2
+  grobWidth.absoluteGrob  ggplot2
+  grobX.absoluteGrob      ggplot2
+  grobY.absoluteGrob      ggplot2
+Job stats:
+job                     count    min threads    max threads
+--------------------  -------  -------------  -------------
+add_failed_seqs             1              1              1
+align_to_reference          1              1              1
+all                         1              1              1
+generate_report             1              1              1
+get_constellations          1              1              1
+hash_sequence_assign        1              1              1
+pangolearn                  1              1              1
+scorpio                     1              1              1
+total                       8              1              1
+
+/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/sklearn/base.py:324: UserWarning: Trying to unpickle estimator DecisionTreeClassifier from version 0.24.2 when using version 1.0. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/modules/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/sklearn/base.py:434: UserWarning: X has feature names, but DecisionTreeClassifier was fitted without feature names
+  warnings.warn(
+/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/sklearn/base.py:434: UserWarning: X has feature names, but DecisionTreeClassifier was fitted without feature names
+  warnings.warn(
+/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/sklearn/base.py:434: UserWarning: X has feature names, but DecisionTreeClassifier was fitted without feature names
+  warnings.warn(
+/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/sklearn/base.py:434: UserWarning: X has feature names, but DecisionTreeClassifier was fitted without feature names
+  warnings.warn(
+/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/sklearn/base.py:434: UserWarning: X has feature names, but DecisionTreeClassifier was fitted without feature names
+  warnings.warn(
+/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/sklearn/base.py:434: UserWarning: X has feature names, but DecisionTreeClassifier was fitted without feature names
+  warnings.warn(
+/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/sklearn/base.py:434: UserWarning: X has feature names, but DecisionTreeClassifier was fitted without feature names
+  warnings.warn(
+Traceback (most recent call last):
+  File "get_foreign_strains_with_mutations.py", line 43, in <module>
+    rec = strain_dict[row["strain"]]
+KeyError: 'EPI_ISL_3471956'

@@ -1,0 +1,39 @@
+MEGA-CC 7.0.26 Molecular Evolutionary Genetics Analysis
+Build#: 7170509-x86_64
+    0%   1-12-21 10:49:20    0%   /export/home/popova/workspace/covid/output/variant_analysis/3oct_opt_min_newpango/3clades.nozero.bif.uniroot.nosingle.nwk.all.2sites.fasta    1%  Reading sequence data                                                                                                                         0%  Setting up Sequence/group names     0%  Setting up genes/domains information     0%  Organizing sequence information     
+    0%   1-12-21 10:49:20 
+Using the following analysis options:
+  No. of Taxa                          9848
+  Analysis                             Ancestral Sequence Inference
+  Tree to Use                          Use tree from file
+  Statistical Method                   Maximum Likelihood
+  Substitutions Type                   Nucleotide
+  Model/Method                         General Time Reversible model
+  Rates among Sites                    Gamma Distributed With Invariant Sites (G+I)
+  No of Discrete Gamma Categories      4
+  Gaps/Missing Data Treatment          Use all sites
+  Site Coverage Cutoff (%)             Not Applicable
+  Branch Swap Filter                   None
+  Has Time Limit                       False
+  Maximum Execution Time               -1
+  datatype                             snNucleotide
+  containsCodingNuc                    False
+  MissingBaseSymbol                    ?
+  IdenticalBaseSymbol                  .
+  GapSymbol                            -
+Start     0%  Setting model parameters MEGA-CC has logged the following error:
+  When         = 1-12-21 10:49:55
+  Data file    = /export/home/popova/workspace/covid/output/variant_analysis/3oct_opt_min_newpango/3clades.nozero.bif.uniroot.nosingle.nwk.all.2sites.fasta
+  AnalysisFile = /export/home/popova/workspace/ksuAncestorPipeline/ancestral_seqs_ML_nucleotide.mao
+  Tree File    = /export/home/popova/workspace/covid/output/variant_analysis/3oct_opt_min_newpango/3clades.nozero.bif.uniroot.nosingle.nwk
+  Parameter    = -f
+  Parameter    = Fasta
+  Parameter    = -t
+  Parameter    = /export/home/popova/workspace/covid/output/variant_analysis/3oct_opt_min_newpango/3clades.nozero.bif.uniroot.nosingle.nwk
+  Parameter    = -o
+  Parameter    = /export/home/popova/workspace/covid/output/variant_analysis/3oct_opt_min_newpango/3clades.nozero.bif.uniroot.nosingle.nwk.2sites.ancestors
+  Message      = MEGA Error: Could not find entry in NameList = vect000866.  Ensure that the names in your tree exactly match the names in your analysis file.
+
+  Please see the summary file for warnings/messages
+  Please validate all your inputs and try again. If you think this is a
+  bug, please report it at http://www.megasoftware.net

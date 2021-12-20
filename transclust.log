@@ -1,0 +1,67 @@
+Sequence length is 29903
+Will assume that branch lengths are given in subs_per_site
+Metadata conversion..
+Parsing tree..
+Parsing metas..
+       seq_id      location country
+0  chuk000001  Чукотский АО  Russia
+1  chuk000002  Чукотский АО  Russia
+2  chuk000003  Чукотский АО  Russia
+3  chuk000004  Чукотский АО  Russia
+4  chuk000005  Чукотский АО  Russia
+           seq_id                                  location    country
+0  EPI_ISL_426900  Oceania / Australia / Northern Territory  Australia
+1  EPI_ISL_426901  Oceania / Australia / Northern Territory  Australia
+2  EPI_ISL_426902  Oceania / Australia / Northern Territory  Australia
+3  EPI_ISL_426903  Oceania / Australia / Northern Territory  Australia
+4  EPI_ISL_426904  Oceania / Australia / Northern Territory  Australia
+                                     seq_id location country
+0  Japan/Donner1/2020|BS000685.1|2020-04-06    Japan   Japan
+1  Japan/Donner2/2020|BS000686.1|2020-04-06    Japan   Japan
+2  Japan/Donner3/2020|BS000687.1|2020-04-06    Japan   Japan
+3  Japan/Donner4/2020|BS000688.1|2020-04-06    Japan   Japan
+4  Japan/Donner6/2020|BS000689.1|2020-04-06    Japan   Japan
+Writing output..
+Parsing tree..
+Making dictionary..
+Writing output..
+Unknown date for tree leaf MN996528.1
+Unknown date for tree leaf EPI_ISL_770686
+Unknown date for tree leaf EPI_ISL_770680
+Unknown date for tree leaf EPI_ISL_770653
+Unknown date for tree leaf EPI_ISL_507205
+Unknown date for tree leaf EPI_ISL_770676
+Unknown date for tree leaf EPI_ISL_770687
+Unknown date for tree leaf EPI_ISL_770683
+Unknown date for tree leaf EPI_ISL_770682
+Unknown date for tree leaf EPI_ISL_770677
+Unknown date for tree leaf EPI_ISL_507217
+Unknown date for tree leaf EPI_ISL_507219
+Unknown date for tree leaf EPI_ISL_507222
+Unknown date for tree leaf EPI_ISL_507218
+Unknown date for tree leaf EPI_ISL_770679
+Unknown date for tree leaf EPI_ISL_605793
+Unknown date for tree leaf EPI_ISL_605795
+Unknown date for tree leaf EPI_ISL_605796
+Unknown date for tree leaf EPI_ISL_770675
+Unknown date for tree leaf EPI_ISL_770678
+Unknown date for tree leaf EPI_ISL_770684
+Unknown date for tree leaf EPI_ISL_507216
+Unknown date for tree leaf EPI_ISL_507221
+Unknown date for tree leaf EPI_ISL_507220
+Unknown date for tree leaf EPI_ISL_507223
+Unknown date for tree leaf EPI_ISL_507300
+Unknown date for tree leaf EPI_ISL_770681
+Unknown date for tree leaf EPI_ISL_770685
+Unknown date for tree leaf EPI_ISL_596233
+Unknown date for tree leaf EPI_ISL_596234
+Unknown date for tree leaf EPI_ISL_872571
+Unknown date for tree leaf EPI_ISL_605794
+metadata converting done in 1 min 
+State reconstruction..
+[1] "Parsing tree..\n"
+[1] "Reading states..\n"
+[1] "Starting parsimony reconstruction.."
+[1] "Parsimony reconstruction finished"
+states reconstructed in 496 min 
+Searching for transmission lineages..

@@ -99,13 +99,14 @@ with open(options.entries_file) as ef:
 		e, content = line.strip().split("\t")
 		entry_contents[e] = content.split(";")
 
-print("Parsing duplicates..")
-duplicates = {}
-with open(options.duplicates, "r") as dfile:
-	for line in dfile:
-		splitter = line.strip().split('\t')
-		if len(splitter) > 1:
-			duplicates[splitter[0]] = splitter[1].split(';')
+if options.duplicates:
+	print("Parsing duplicates..")
+	duplicates = {}
+	with open(options.duplicates, "r") as dfile:
+		for line in dfile:
+			splitter = line.strip().split('\t')
+			if len(splitter) > 1:
+				duplicates[splitter[0]] = splitter[1].split(';')
 
 print("Parsing pangolineages..")
 pango = pd.read_csv(options.pangolined, sep=",")
@@ -152,11 +153,12 @@ for entry in entries:
 	entry_strains = entry_contents[entry_node.name]
 	#entry_countries = [countries_dict.get(s, "unknown") for s in entry_strains]
 	entry_dates = [dates_dict.get(s, "") for s in entry_strains if countries_dict.get(s, "unknown") == "Russia"]
-	for s in entry_strains:
-		if s in duplicates:
-			#entry_countries.extend([countries_dict.get(d, "unknown") for d in duplicates[s]])
-			if countries_dict.get(s, "unknown") == "Russia":
-				entry_dates.extend([dates_dict.get(d, "") for d in duplicates[s]])
+	if options.duplicates:
+		for s in entry_strains:
+			if s in duplicates:
+				#entry_countries.extend([countries_dict.get(d, "unknown") for d in duplicates[s]])
+				if countries_dict.get(s, "unknown") == "Russia":
+					entry_dates.extend([dates_dict.get(d, "") for d in duplicates[s]])
 
 
 	print("Styling tree..")

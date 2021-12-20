@@ -1,0 +1,21 @@
+Parsing tree..
+Parsing countries..
+{'chuk000001': 'Russia', 'chuk000002': 'Russia', 'chuk000003': 'Russia', 'chuk000004': 'Russia', 'chuk000005': 'Russia'}
+faFiltering gisaid strains without pangolin annotation..
+loading model 10/28/2021, 12:38:41
+processing block of 1000 sequences 10/28/2021, 12:38:50
+processing block of 1000 sequences 10/28/2021, 12:38:58
+processing block of 658 sequences 10/28/2021, 12:39:06
+complete 10/28/2021, 12:39:10
+[32mOutput file written to: [0m/export/home/popova/workspace/covid/output/transmission_lineages/usher/3oct_opt_min_newpango/pangolin_from_raw_fasta/rus.nopango.pangolined
+[32mAll dependencies satisfied.[0m
+[32mThe query file is:[0m/export/home/popova/workspace/covid/output/transmission_lineages/usher/3oct_opt_min_newpango/pangolin_from_raw_fasta/rus.nopango.msa
+[32m** Running sequence QC **[0m
+[32mNumber of sequences detected: [0m4628
+[32mTotal passing QC: [0m4628
+[32m
+Data files found:[0m
+Trained model:	/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/pangoLEARN/data/decisionTree_v1.joblib
+Header file:	/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/pangoLEARN/data/decisionTreeHeaders_v1.joblib
+Designated hash:	/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/pangoLEARN/data/lineages.hash.csv
+Fatal error: cannot open file 'pangolin_stat.R': No such file or directory

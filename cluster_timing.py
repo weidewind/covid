@@ -32,7 +32,7 @@ print(dict(list(dates_dict.items())[0:5]))
 
 with open(options.transmission_lineages_file, "r") as tlf:
 	with open(options.output, "w") as out:
-		out.write("\t".join(["entry", "mean_date", "median_date", "min_date", "max_date", "all_dates"]) + "\n")
+		out.write("\t".join(["entry", "mean_date", "median_date", "min_date", "min_date_strains","max_date", "all_dates"]) + "\n")
 		for line in tlf:
 			entry, strains = line.strip().split("\t")
 			strain_list = strains.split(";")
@@ -40,6 +40,7 @@ with open(options.transmission_lineages_file, "r") as tlf:
 			cleaned_dates = [d for d in dates if d != "unknown" and len(d) >= 10]
 			if cleaned_dates:
 				fmean, fmedian, fmin, fmax = dateStats(cleaned_dates)
-				out.write("\t".join([entry, fmean, fmedian, fmin, fmax, ",".join(cleaned_dates)]) + "\n")
+				earliest = [strain for strain in strain_list if dates_dict.get(strain,"unknown") == fmin]
+				out.write("\t".join([entry, fmean, fmedian, fmin, ",".join(earliest), fmax, ",".join(cleaned_dates)]) + "\n")
 			else:
 				out.write("\t".join([entry, "", "", "", "", ""])+ "\n")

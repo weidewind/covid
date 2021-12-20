@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "timing.py", line 245, in <module>
+    foreign_clean_dates, foreign_clean_nodes, fmindist = collectClosestSearch(entry_node, leaf_has_dated_foreign, country_pointer="f", maxdist=options.maxdist)
+  File "timing.py", line 159, in collectClosestSearch
+    mindist, output_nodes = collectClosest(s, curdist, mindist, output_nodes, leaf_is_ok)
+  File "timing.py", line 86, in collectClosest
+    (mindist, output_nodes) = collectClosest(ch, chdist, mindist, output_nodes, leaf_is_ok)
+  File "timing.py", line 86, in collectClosest
+    (mindist, output_nodes) = collectClosest(ch, chdist, mindist, output_nodes, leaf_is_ok)
+  File "timing.py", line 86, in collectClosest
+    (mindist, output_nodes) = collectClosest(ch, chdist, mindist, output_nodes, leaf_is_ok)
+  [Previous line repeated 992 more times]
+  File "timing.py", line 77, in collectClosest
+    if node.is_leaf() and curdist <= mindist and leaf_is_ok(node):
+  File "/export/home/popova/miniconda3/lib/python3.6/site-packages/ete3/coretype/tree.py", line 966, in is_leaf
+    return len(self.children) == 0
+RecursionError: maximum recursion depth exceeded

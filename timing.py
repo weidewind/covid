@@ -8,6 +8,9 @@ import matplotlib
 import pandas as pd
 import numpy as np
 import re
+import sys
+
+sys.setrecursionlimit(3500)
 
 parser = optparse.OptionParser()
 parser.add_option('-t', '--tree', help='tree file', type='str')
@@ -200,13 +203,14 @@ countries = pd.read_csv(options.countries, sep="\t", names=['seq_id', 'state', '
 countries_dict = dict(zip(countries['seq_id'], countries['region']))
 print(dict(list(countries_dict.items())[0:5]))
 
-print("Parsing duplicates..")
-duplicates = {}
-with open(options.duplicates, "r") as dfile:
-	for line in dfile:
-		splitter = line.strip().split('\t')
-		if len(splitter) > 1:
-			duplicates[splitter[0]] = splitter[1].split(';')
+if options.duplicates:
+	print("Parsing duplicates..")
+	duplicates = {}
+	with open(options.duplicates, "r") as dfile:
+		for line in dfile:
+			splitter = line.strip().split('\t')
+			if len(splitter) > 1:
+				duplicates[splitter[0]] = splitter[1].split(';')
 
 print("Connecting nodes, countries and dates..")
 node_to_dates = {} # node_to_dates{leaf_name}{"r"}["2020-03-10", "2020-04-11"] - all correct dates for russia(r) and other countries(f)
@@ -215,8 +219,9 @@ for leaf in tree.iter_leaves():
 	rstrains = []
 	node_to_dates[leaf.name] = {"f":[], "r":[]}
 	strains = [leaf.name]
-	if leaf.name in duplicates:
-		strains.extend(duplicates[leaf.name])
+	if options.duplicates:
+		if leaf.name in duplicates:
+			strains.extend(duplicates[leaf.name])
 	for s in strains:
 		c = countries_dict.get(s, "unknown")
 		d = dates_dict.get(s, "unknown")

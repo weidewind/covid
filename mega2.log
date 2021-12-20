@@ -1,0 +1,18 @@
+MEGA-CC 7.0.26 Molecular Evolutionary Genetics Analysis
+Build#: 7170509-x86_64
+MEGA-CC has logged the following error:
+  When         = 30-11-21 20:43:26
+  Data file    = /export/home/popova/workspace/covid/output/variant_analysis/3oct_opt_min_newpango/megatest/3clades.nozero.bif.uniroot.nwk.all.cut.fasta
+  AnalysisFile = /export/home/popova/workspace/ksuAncestorPipeline/ancestral_seqs_ML_nucleotide.mao
+  Tree File    = /export/home/popova/workspace/covid/output/variant_analysis/3oct_opt_min_newpango/megatest/3clades.nozero.bif.uniroot.nwk
+  Parameter    = -f
+  Parameter    = Fasta
+  Parameter    = -t
+  Parameter    = /export/home/popova/workspace/covid/output/variant_analysis/3oct_opt_min_newpango/megatest/3clades.nozero.bif.uniroot.nwk
+  Parameter    = -o
+  Parameter    = .ancestors
+  Message      = The data file you specified (/export/home/popova/workspace/covid/output/variant_analysis/3oct_opt_min_newpango/megatest/3clades.nozero.bif.uniroot.nwk.all.cut.fasta) does not exist.  Please check your spelling and try again.
+
+  Please see the summary file for warnings/messages
+  Please validate all your inputs and try again. If you think this is a
+  bug, please report it at http://www.megasoftware.net

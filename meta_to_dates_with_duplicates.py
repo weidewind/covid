@@ -47,7 +47,7 @@ def dateStats(cleaned_od, quanttype):
 print("Parsing tree..")
 tree = Tree(options.tree, format=1)
 
-meta_dict = get_date_dict()
+meta_dict = get_date_dict(options.output)
 
 
 print("Parsing duplicates..")

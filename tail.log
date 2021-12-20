@@ -1,0 +1,30 @@
+Calls: parse_args -> getopt
+Execution halted
+Error in getopt(spec = spec, opt = args) : 
+  flag "tag" requires an argument
+Calls: parse_args -> getopt
+Execution halted
+Execution halted
+Execution halted
+Error in getopt(spec = spec, opt = args) : 
+  flag "tag" requires an argument
+Calls: parse_args -> getopt
+Error in getopt(spec = spec, opt = args) : 
+  flag "tag" requires an argument
+Calls: parse_args -> getopt
+Error in getopt(spec = spec, opt = args) : 
+  flag "tag" requires an argument
+Calls: parse_args -> getopt
+Execution halted
+Execution halted
+Execution halted
+Error in getopt(spec = spec, opt = args) : 
+  flag "tag" requires an argument
+Calls: parse_args -> getopt
+Error in getopt(spec = spec, opt = args) : 
+  flag "tag" requires an argument
+Calls: parse_args -> getopt
+Execution halted
+Execution halted
+Execution halted
+cat: /export/home/popova/workspace/covid/output/transmission_lineages/usher/3oct_opt/transmission_lineages.withduplicates.out.part1.dates_stats.corrected..csv: No such file or directory

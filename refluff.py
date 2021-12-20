@@ -5,6 +5,7 @@ import optparse
 
 parser = optparse.OptionParser()
 parser.add_option('-t', '--tree', help='tree file', type='str')
+parser.add_option('-z', '--zero', help='branch length which corresponds to zero', str=float, default=0)
 parser.add_option('-d', '--duplicates', help='file with duplicates', type='str')
 parser.add_option('-o', '--output', help='output tree', type='str')
 
@@ -23,14 +24,22 @@ with open(options.duplicates, "r") as dfile:
 			duplicates[splitter[0]] = splitter[1].split(';')
 
 print("Adding duplicate leaves..")
+leafnames = [leaf.name for leaf in leaves]
 for leaf in leaves:
 	if leaf.name in duplicates:
 		leafn = leaf.name
-		leaf.name = "node_" + leaf.name
+	if leaf.dist > options.zero:
+		leaf.name = "node_" + leafn
 		leaf.add_child(name=leafn, dist=0)
 		for dup in duplicates[leafn]:
-			if dup not in leaves:
+			if dup not in leafnames:
 				leaf.add_child(name=dup, dist=0)
+			else:
+				print("Duplicate " + dup + " is already present in the tree, won't add")
+	else:
+		for dup in duplicates[leafn]:
+			if dup not in leafnames:
+				leaf.up.add_child(name=dup, dist=0)
 			else:
 				print("Duplicate " + dup + " is already present in the tree, won't add")
 

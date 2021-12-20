@@ -1,0 +1,71 @@
+{'tree': '/export/home/popova/workspace/covid/data/munched/usher/3oct_opt/2021-09-30_usher_2_2_opt_fluffed_gisaid.nw', 'fasta': '/export/home/popova/workspace/covid/output/transmission_lineages/usher/3oct_opt_min_newpango/rus.gisaid.mmsa,/export/home/popova/workspace/covid/data/raw/raw_rus_fasta_30sep/2021-09-30_all_rus_for_usher_nextstrain.fasta', 'pangolined': '/export/home/popova/workspace/covid/output/transmission_lineages/usher/3oct_opt_min_newpango/rus.pangolined.withdupls', 'melted_entries': '/export/home/popova/workspace/covid/output/transmission_lineages/usher/3oct_opt_min_newpango/melted_entries.withdates.csv', 'dates': '/export/home/popova/workspace/covid/output/transmission_lineages/usher/3oct_opt_min_newpango/leaf_dates.csv', 'output': '/export/home/popova/workspace/covid/output/variant_analysis/3oct_opt_min_newpango/taxon_mutations'}
+Parsing metas..
+       seq_id      location country
+0  chuk000001  Чукотский АО  Russia
+1  chuk000002  Чукотский АО  Russia
+2  chuk000003  Чукотский АО  Russia
+3  chuk000004  Чукотский АО  Russia
+4  chuk000005  Чукотский АО  Russia
+           seq_id                                  location    country
+0  EPI_ISL_426900  Oceania / Australia / Northern Territory  Australia
+1  EPI_ISL_426901  Oceania / Australia / Northern Territory  Australia
+2  EPI_ISL_426902  Oceania / Australia / Northern Territory  Australia
+3  EPI_ISL_426903  Oceania / Australia / Northern Territory  Australia
+4  EPI_ISL_426904  Oceania / Australia / Northern Territory  Australia
+                                     seq_id location country
+0  Japan/Donner1/2020|BS000685.1|2020-04-06    Japan   Japan
+1  Japan/Donner2/2020|BS000686.1|2020-04-06    Japan   Japan
+2  Japan/Donner3/2020|BS000687.1|2020-04-06    Japan   Japan
+3  Japan/Donner4/2020|BS000688.1|2020-04-06    Japan   Japan
+4  Japan/Donner6/2020|BS000689.1|2020-04-06    Japan   Japan
+{'chuk000001': 'Russia', 'chuk000002': 'Russia', 'chuk000003': 'Russia', 'chuk000004': 'Russia', 'chuk000005': 'Russia'}
+             taxon stub  ...     status                             note
+0   EPI_ISL_984656  NaN  ...  passed_qc  Assigned from designation hash.
+1  EPI_ISL_1919471  NaN  ...  passed_qc                              NaN
+2  EPI_ISL_1627565  NaN  ...  passed_qc                              NaN
+
+[3 rows x 14 columns]
+{'EPI_ISL_984656': 'B.1.1.141', 'EPI_ISL_1919471': 'B.1.1.141', 'EPI_ISL_1627565': 'B.1.1.141', 'vect000386': 'B.1.1.141', 'vect000388': 'B.1.1.141'}
+   .id           entry          strain lineage        date  is_stem  entry_date
+0    1      vect000307      vect000307       A  2021-02-08    False  2021-02-12
+1    2      obol000192      obol000192  A.23.1  2021-03-14    False  2021-01-17
+2    3  EPI_ISL_428893  EPI_ISL_428893       A  2020-03-23     True  2020-03-20
+{'vect000307': 'vect000307', 'obol000192': 'obol000192', 'EPI_ISL_428893': 'EPI_ISL_428893', 'EPI_ISL_428898': 'EPI_ISL_428898', 'EPI_ISL_428883': 'EPI_ISL_428883'}
+Parsing dates
+{'chuk000001': '2021-05-17', 'chuk000002': '2021-05-17', 'chuk000003': '2021-05-17', 'chuk000004': '2021-05-17', 'chuk000005': '2021-04-25'}
+Parsing tree..
+Searching in /export/home/popova/workspace/covid/output/transmission_lineages/usher/3oct_opt_min_newpango/rus.gisaid.mmsa..
+Searching in /export/home/popova/workspace/covid/data/raw/raw_rus_fasta_30sep/2021-09-30_all_rus_for_usher_nextstrain.fasta..
+loading model 11/24/2021, 20:59:33
+processing block of 1000 sequences 11/24/2021, 20:59:35
+processing block of 1000 sequences 11/24/2021, 20:59:39
+processing block of 1000 sequences 11/24/2021, 20:59:42
+processing block of 1000 sequences 11/24/2021, 20:59:46
+processing block of 1000 sequences 11/24/2021, 20:59:50
+processing block of 1000 sequences 11/24/2021, 20:59:53
+processing block of 57 sequences 11/24/2021, 20:59:56
+complete 11/24/2021, 20:59:56
+[32mOutput file written to: [0m/export/home/popova/workspace/covid/output/transmission_lineages/usher/3oct_opt_min_newpango/close_foreign.pangolined
+[32mAll dependencies satisfied.[0m
+[32mThe query file is:[0m/export/home/popova/workspace/covid/output/transmission_lineages/usher/3oct_opt_min_newpango/close_foreign.gisaid.mmsa
+[32m** Running sequence QC **[0m
+[32mNumber of sequences detected: [0m6057
+[32mTotal passing QC: [0m6057
+[32m
+Data files found:[0m
+Trained model:	/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/pangoLEARN/data/decisionTree_v1.joblib
+Header file:	/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/pangoLEARN/data/decisionTreeHeaders_v1.joblib
+Designated hash:	/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/pangoLEARN/data/lineages.hash.csv
+            taxon lineage  conflict  ...  pango_version     status  note
+0  EPI_ISL_425565   B.1.1       0.0  ...        v1.2.86  passed_qc   NaN
+1  EPI_ISL_426892   B.1.1       0.0  ...        v1.2.86  passed_qc   NaN
+2  EPI_ISL_425527   B.1.1       0.0  ...        v1.2.86  passed_qc   NaN
+
+[3 rows x 13 columns]
+{'EPI_ISL_425565': 'B.1.1', 'EPI_ISL_426892': 'B.1.1', 'EPI_ISL_425527': 'B.1.1', 'EPI_ISL_425679': 'B.1.1', 'EPI_ISL_423063': 'B.1.1'}
+    entry        date           strain
+0  155746  2021-05-13  EPI_ISL_2660906
+1  155746  2021-05-06  EPI_ISL_2373225
+2  155746  2021-07-07  EPI_ISL_3668117
+Parsing tree..
+Searching in /export/home/popova/workspace/covid/output/transmission_lineages/usher/3oct_opt_min_newpango/close_foreign.gisaid.mmsa..

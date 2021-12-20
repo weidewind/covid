@@ -1,0 +1,23 @@
+Job stats:
+job                     count    min threads    max threads
+--------------------  -------  -------------  -------------
+add_failed_seqs             1              1              1
+align_to_reference          1              1              1
+all                         1              1              1
+generate_report             1              1              1
+get_constellations          1              1              1
+hash_sequence_assign        1              1              1
+pangolearn                  1              1              1
+scorpio                     1              1              1
+total                       8              1              1
+
+/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/sklearn/base.py:324: UserWarning: Trying to unpickle estimator DecisionTreeClassifier from version 0.24.2 when using version 1.0. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/modules/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/sklearn/base.py:434: UserWarning: X has feature names, but DecisionTreeClassifier was fitted without feature names
+  warnings.warn(
+/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/sklearn/base.py:434: UserWarning: X has feature names, but DecisionTreeClassifier was fitted without feature names
+  warnings.warn(
+/export/home/popova/miniconda3/envs/pangolin/lib/python3.8/site-packages/sklearn/base.py:434: UserWarning: X has feature names, but DecisionTreeClassifier was fitted without feature names
+  warnings.warn(
+python: can't open file 'select_rus_pangolined.py': [Errno 2] No such file or directory
