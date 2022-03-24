@@ -37,14 +37,31 @@ sample_coverage <- function(df){
   N = sum(df$n)
   f1 = nrow(df[df$n == 1,])
   f2 = nrow(df[df$n == 2,])
-  return(1-(f1/N)*(N-1)*f1/((N-1)*f1+2*f2))
+  res = 1-(f1/N)*(N-1)*f1/((N-1)*f1+2*f2)
+  # if (is.nan(res)){
+    # print("Debug sample_coverage: df ")
+	# print(df)
+  # }
+  return(res)
   
 }
 
 rarefied_coverage <- function(df, m){
   N = sum(df$n)
   t = sapply(df$n, function(x){
-    (x*choose((N-x),m))/(N*choose((N-1),m))
+    # equivalent for (x*choose((N-x),m))/(N*choose((N-1),m)):
+	res =  x/N
+    t = m
+    while (t >= 1){
+      res = res*(N-x-t+1)/(N-t)
+      t = t-1
+    }
+	# if (is.nan(res)){
+		# ve = c(x, N, m, choose((N-x),m),choose((N-1),m))
+		# names(ve) = c("x", "N", "m", "choose((N-x),m)","choose((N-1),m)")
+		# print(ve)
+	# }
+	res
   })
   return(1-sum(unlist(t)))
 }
@@ -68,6 +85,10 @@ m_asterisk <- function(df, coverage){
 
 
 m_rarefied <- function(df, coverage, init.coverage = NULL){
+  # print("Debug: init.coverage")
+  # print(init.coverage)
+  # print("Debug: sample coverage")
+  # print(sample_coverage(df))
   if (is.null(init.coverage))
     init.coverage = sample_coverage(df)
   m = sum(df$n)
@@ -75,6 +96,13 @@ m_rarefied <- function(df, coverage, init.coverage = NULL){
   while (new_coverage > coverage){
     m = m-1
     new_coverage = rarefied_coverage(df, m = m)
+	# print("Debug: m, new_coverage")
+	# print(m)
+	# print(new_coverage)
+	# if(is.nan(new_coverage)){
+		# print("Debug: df")
+		# print(df)
+	# }
   }
  data.frame(m=m, rarefied_coverage = new_coverage)
 }
@@ -82,9 +110,10 @@ m_rarefied <- function(df, coverage, init.coverage = NULL){
 
 melted = read.csv2(opt$melted_entries_file, header = T, stringsAsFactors=FALSE, colClasses = c("numeric", "character", "character", "character", "Date", "logical", "Date"))
 melted = melted[!is.na(melted$date), ]
-melted$bin = cut(melted$date, breaks = by_week(melted$date))
+melted$bin = cut(melted$date, breaks = by_week(melted$date, 2))
 counts = melted %>% count(bin, entry)
-print(head(counts))
+# print("Debug: head(counts))")
+# print(head(counts))
 bins = unique(melted$bin)
 coverages = sapply(bins, function(bin){
   subset = counts[counts$bin == bin,]

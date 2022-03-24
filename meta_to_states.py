@@ -19,10 +19,13 @@ meta_dict = get_country_dict()
 
 print("Writing output..")
 with open(options.output, "w") as out:
-	for strain, country in meta_dict.items():
-		state = 2 if country == "Russia" else 1
-		out.write(strain + "\t" + str(state) + "\t" + country + "\n")
+#	for strain, country in meta_dict.items():
+#		state = 2 if country == "Russia" else 1
+#		out.write(strain + "\t" + str(state) + "\t" + country + "\n")
 	for leaf in tree.iter_leaves():
-		if leaf.name not in meta_dict:
-			out.write(leaf.name + "\t" + str(1) + "\t" + "unknown" + "\n")
+		country = meta_dict.get(leaf.name, "unknown")
+		state = 2 if country == "Russia" else 1
+		out.write(leaf.name + "\t" + str(state) + "\t" + country + "\n")
+		#if leaf.name not in meta_dict:
+		#	out.write(leaf.name + "\t" + str(1) + "\t" + "unknown" + "\n")
 		

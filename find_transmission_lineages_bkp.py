@@ -13,7 +13,6 @@ parser.add_option('-s', '--states', help='tab-delimited file with states for all
 parser.add_option('-d', '--duplicates', help='file with duplicates (and cluster memebers)', type='str')
 parser.add_option('-c', '--countries', help='file with ids and countries, output from meta_to_states.py', type='str')
 parser.add_option('-p', '--print_broader_subtree', default=-1, help='return newick subtrees for each entry. Make N steps up the tree before extracting a subtree', type='int')
-parser.add_option('-e', '--export_rule', help='symm (probability of being russian <1) or asymm (probability of being russian == 0)', type='str', default="asymm")
 parser.add_option('-o', '--output', help='output', type='str')
 
 options, args = parser.parse_args()
@@ -23,7 +22,7 @@ lineages = {} # lineages{entry_node_name} = @strains
 
 def find_primary_lineages(node, array, entry_nname):
     array.append(node)
-    exported = entry_nname is not None and (options.export_rule == "asymm" and states[node.name] == 0 or options.export_rule == "symm" and states[node.name] < 1)
+    exported = entry_nname is not None and states[node.name] == 0
     print("Processing node " + node.name + " with state 2 probability " + str(states[node.name]) + " and exproted = " + str(exported))
     #print("Is it exported? " + str(exported))
     #if len(lineages) > 0:
@@ -48,16 +47,15 @@ def find_primary_lineages(node, array, entry_nname):
     return(array)
 
 
-def find_lineages(node, array, entry_nname, export_nname):
+def find_lineages(node, array, entry_nname):
     array.append(node)
-    exported = entry_nname is not None and (options.export_rule == "asymm" and states[node.name] == 0 or options.export_rule == "symm" and states[node.name] < 1)
+    exported = entry_nname is not None and states[node.name] == 0
     if exported:
         if entry_nname not in exports:
             exports[entry_nname] = []
         exports[entry_nname].append(node.name)
         entry_nname = None
-        export_nname = node.name
-        print("Processing exported node " + node.name + " with state 2 probability " + str(states[node.name]) + " and exproted = " + str(exported) + " export node " + str(export_nname))
+    print("Processing node " + node.name + " with state 2 probability " + str(states[node.name]) + " and exproted = " + str(exported))
     #print("Is it exported? " + str(exported))
     #if len(lineages) > 0:
     #   print("Lineage len " + str(len(lineages)))
@@ -69,17 +67,13 @@ def find_lineages(node, array, entry_nname, export_nname):
             entry_nname = node.name
             print("Lineage started at " + entry_nname)
             lineages[entry_nname] = []
-            if export_nname is not None:
-            	print("export_nname is not None! entry " + entry_nname + " export_nname " + export_nname)
-            	secondary[entry_nname] = export_nname
-            	export_nname = None
             if node.is_leaf():
                 lineages[entry_nname].append(node.name)
                 #else:
                      #node.write(format=1, outfile=options.output + "_entry_" + node.name + ".newick")
     if not node.is_leaf():
         for child in node.children:
-            array = find_lineages(child, array, entry_nname, export_nname)
+            array = find_lineages(child, array, entry_nname)
     node = array.pop()
     return(array)
 
@@ -98,16 +92,13 @@ with open(options.states) as st:
     for line in st:
         [nname, _, state2_prob] = line.split()
         states[nname] = float(state2_prob)  # probability of being russian
-        #print("nname " + nname + " state 2 probability " + str(state2_prob))
+        print("nname " + nname + " state 2 probability " + str(state2_prob))
 
 
 array = []
 print("Looking for lineages.. ")
 exports = {}
-secondary = {}
-find_lineages(tree.get_tree_root(), array, None, None)
-print(dict(list(secondary.items())))
-
+find_lineages(tree.get_tree_root(), array, None)
 
 print("Parsing countries..")
 countries = pd.read_csv(options.countries, sep="\t", names=['seq_id', 'state', 'region'])
@@ -142,33 +133,30 @@ with open(options.output + "stats", "w") as out:
 
 with open(options.output, "w") as out:  
     for entry_nname in lineages.keys():
-        out.write(entry_nname  + "\t")
-        out.write(";".join(lineages[entry_nname]) + "\t")
-        if entry_nname in secondary:
-        	out.write(secondary[entry_nname]) # export node name
-        out.write("\n")
+        out.write(entry_nname + "\t")
+        out.write(";".join(lineages[entry_nname]) + "\n")
 
 with open(options.output + ".entries", "w") as out:
     for entry_nname in lineages.keys():
-        out.write(entry_nname  + "\n")
+        out.write(entry_nname + "\n")
 
 with open(options.output + ".entries.exports", "w") as out:
     for entry_nname,export_array in exports.items():
         for e in export_array:
-            out.write(entry_nname  + "\t" + e + "\n")
+            out.write(entry_nname + "\t" + e + "\n")
 
 with open(options.output + ".exports", "w") as out:
     out.write("\n".join(["\n".join(export_array) for export_array in exports.values()]))
 
-# steps = options.print_broader_subtree
-# if steps > -1:
-#     for entry_nname in lineages.keys():
-#         entry_node = tree.search_nodes(name=entry_nname)[0]
-#         if not entry_node.is_leaf():
-#             counter = 0
-#             printing_node = entry_node
-#             while counter < steps:
-#                 printing_node = printing_node.up
-#                 counter += 1
-#             printing_node.write(format=1, outfile=options.output + "_entry_" + entry_node.name + "_" + str(steps) + "_steps_up.newick")
+steps = options.print_broader_subtree
+if steps > -1:
+    for entry_nname in lineages.keys():
+        entry_node = tree.search_nodes(name=entry_nname)[0]
+        if not entry_node.is_leaf():
+            counter = 0
+            printing_node = entry_node
+            while counter < steps:
+                printing_node = printing_node.up
+                counter += 1
+            printing_node.write(format=1, outfile=options.output + "_entry_" + entry_node.name + "_" + str(steps) + "_steps_up.newick")
 

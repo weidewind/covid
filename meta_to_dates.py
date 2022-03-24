@@ -20,10 +20,9 @@ meta_dict = get_date_dict(options.output)
 
 print("Writing output..")
 with open(options.output, "w") as out:
-	for strain, date in meta_dict.items():
-		out.write(strain + "\t" + date + "\n")
-
-
+#	for strain, date in meta_dict.items():
+#		out.write(strain + "\t" + date + "\n")
 	for leaf in tree.iter_leaves():
+		out.write(leaf.name + "\t" + meta_dict.get(leaf.name, "unknown") + "\n")
 		if meta_dict.get(leaf.name, "unknown") =="unknown":
 			print("Unknown date for tree leaf " + leaf.name)

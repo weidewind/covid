@@ -14,6 +14,24 @@ options_genbank_meta ='/export/home/popova/workspace/covid/data/raw/public-lates
 regions_table = '/export/home/popova/workspace/covid/data/russian/regions_table.csv'
 
 
+def get_origin_dict():
+    meta = pd.read_csv(options_rpn_meta, sep="\t")[['Внутренний номер', 'Откуда прибыл']]
+    meta.columns = ['seq_id', 'origin']
+    meta['origin'] = meta['origin'].apply(clean_origin)
+    meta_dict = dict(zip(meta['seq_id'], meta['origin']))
+    return(meta_dict)
+
+
+def clean_origin(origin):
+    if origin in ["Неизвестно", "неизвестно", "нет", "Нет", "", " "] or origin is None or origin != origin: # last one means it's nan
+        return("")
+    else:
+        country = re.split(r'[,/]', origin)[0]
+        if country in ["Россия", "г Москва"]:
+            return("")
+        else:
+            return(country)
+
 
 def get_location_dict(colnum):
     print("Parsing metas..")

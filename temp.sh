@@ -7,16 +7,18 @@ do
 done
 
 source $config_file
+source timing.sh
+
+mkdir -p $output_folder
+cp $config_file ${output_folder}/$config_file
 
 set -e # exit if any command exits with non-zero status
 
-masked_gisaid_msa=/export/home/popova/workspace/covid/data/raw/mmsa_2021-11-17/2021-11-17_masked.fa
-variants_folder=/export/home/popova/workspace/covid/output/variant_analysis/${tag}
-variants_file=${variants_folder}/taxon_mutations
-source $conda_config
+translin_file=${translin_file}.broken
 
-
-xvfb-run python -u strip_tree_on_closest.py --tree ${output_folder}/Sankoff_states.csv.newick --melted_foreign ${variants_file}_foreign \
---dates $leaf_dates_file --entry_nodes_file $variants_file --output ${variants_folder}/stripped_tree --scale 10
-
-
+echo "compare_imports_to_exports.."
+# compare tree_distance_to_closest_foreign_strain for exports and primary and secondary imports 
+Rscript compare_imports_to_exports.R --imports_dates_stats ${translin_file}.dates_stats \
+--exports_dates_stats ${translin_file}.exports.dates_stats \
+--entries_file ${translin_file} --output_file ${output_folder}/imports_to_exports \
+--imports_data ${output_folder}/${tag}_data.csv --lineages B.1.1.523,B.1.1.317,AY.122,B.1.1.397,B.1.1.7

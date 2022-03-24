@@ -24,8 +24,9 @@ options(stringsAsFactors = FALSE)
 
 strains_per_entry <- function(df, window, date, lineage, normalized = FALSE){
 	entries = df[df$date >= date - window/2 & df$date <= date + window/2 & df$legend_lineage == lineage & !df$is_stem, "entry"]
-	entries_per_date = length(unique(df[df$entry_date == date & df$legend_lineage == lineage & !df$is_stem,"entry"])) # how many entries happened on that day? entry_count - how many entries are alive on that day?
-	out = data.frame(date = date, entries_per_date = entries_per_date, strain_count = length(entries), entry_count = length(unique(entries)), strains_per_entry = length(entries)/length(unique(entries)))
+	#entries_per_date = length(unique(df[df$entry_date == date & df$legend_lineage == lineage & !df$is_stem,"entry"])) # how many entries happened on that day? entry_count - how many entries are alive on that day?
+	#entries_per_date = entries_per_date,
+	out = data.frame(date = date, strain_count = length(entries), entry_count = length(unique(entries)), strains_per_entry = length(entries)/length(unique(entries)))
 	if (normalized){
 		total_strain_count = nrow(df[df$date >= date - window/2 & df$date <= date + window/2 & !df$is_stem,])
 		out$strains_per_entry = out$strains_per_entry/total_strain_count

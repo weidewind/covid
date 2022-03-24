@@ -34,7 +34,7 @@ with open(options.transmission_lineages_file, "r") as tlf:
 	with open(options.output, "w") as out:
 		out.write("\t".join(["entry", "mean_date", "median_date", "min_date", "min_date_strains","max_date", "all_dates"]) + "\n")
 		for line in tlf:
-			entry, strains = line.strip().split("\t")
+			entry, strains = line.strip().split("\t")[:2]
 			strain_list = strains.split(";")
 			dates = [dates_dict[strain] for strain in strain_list if strain in dates_dict]
 			cleaned_dates = [d for d in dates if d != "unknown" and len(d) >= 10]

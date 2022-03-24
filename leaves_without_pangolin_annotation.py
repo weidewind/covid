@@ -22,10 +22,12 @@ if options.countries:
 	print(dict(list(countries_dict.items())[0:5]))
 
 pangodict = {}
-with open(options.pangolined, "r") as pango:
-	for l in pango:
-		splitter = l.strip().split(",")
-		pangodict[splitter[0]] = ",".join(splitter[1:])
+pangofiles = options.pangolined.split(",")
+for pfile in [f for f in pangofiles if f != ""]:
+	with open(pfile, "r") as pango:
+		for l in pango:
+			splitter = l.strip().split(",")
+			pangodict[splitter[0]] = ",".join(splitter[1:])
 
 with open(options.output, "w") as out:
 	for l in leaves:
